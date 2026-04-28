@@ -1,7 +1,5 @@
 import { create } from 'zustand';
 
-interface SidereusState {
-  // adicione estados aqui no futuro
-}
+type SidereusState = Record<string, never>;
 
 export const useStore = create<SidereusState>(() => ({}));
