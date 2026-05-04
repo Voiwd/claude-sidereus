@@ -10,7 +10,9 @@
     "lint:check": "eslint . --ext ts,tsx --max-warnings 0",
     "preview": "vite preview",
     "format": "prettier --write \"**/*.{ts,tsx,js,jsx,json,css,md}\"",
-    "format:check": "prettier --check \"**/*.{ts,tsx,js,jsx,json,css,md}\""
+    "format:check": "prettier --check \"**/*.{ts,tsx,js,jsx,json,css,md}\"",
+    "prepare": "husky install",
+    "test": ""
   },
   "dependencies": {
     "@react-three/drei": "^10.7.7",
@@ -39,6 +41,13 @@
     "tailwindcss": "^4.2.4",
     "typescript": "~6.0.2",
     "typescript-eslint": "^8.58.2",
-    "vite": "^8.0.10"
+    "vite": "^8.0.10",
+    "husky": "^8.0.0"
+  },
+  "lint-staged": {
+    "*.{js,jsx,ts,tsx,json}": [
+      "prettier --write",
+      "eslint --fix"
+    ]
   }
 }
