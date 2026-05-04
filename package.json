@@ -12,7 +12,7 @@
     "format": "prettier --write \"**/*.{ts,tsx,js,jsx,json,css,md}\"",
     "format:check": "prettier --check \"**/*.{ts,tsx,js,jsx,json,css,md}\"",
     "prepare": "husky install",
-    "test": ""
+    "test": "npm run build"
   },
   "dependencies": {
     "@react-three/drei": "^10.7.7",
