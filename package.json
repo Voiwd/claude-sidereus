@@ -9,8 +9,8 @@
     "lint": "eslint . --ext ts,tsx --fix --max-warnings 0",
     "lint:check": "eslint . --ext ts,tsx --max-warnings 0",
     "preview": "vite preview",
-    "format": "prettier --write \"**/*.{ts,tsx,js,jsx,json,css,md}\"",
-    "format:check": "prettier --check \"**/*.{ts,tsx,js,jsx,json,css,md}\"",
+    "format": "prettier --write \"**/*.{ts,tsx,js,jsx}\"",
+    "format:check": "prettier --check \"**/*.{ts,tsx,js,jsx}\"",
     "prepare": "husky install",
     "test": "npm run build"
   },
