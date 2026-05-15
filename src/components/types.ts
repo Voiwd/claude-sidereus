@@ -4,4 +4,6 @@ export interface PlanetProps {
   name: string;
   radius: number;
   texture2?: string;
+  isFocused?: boolean;
+  onClick?: () => void;
 }
