@@ -1,13 +1,18 @@
-import { Canvas } from '@react-three/fiber';
-import { Scene } from './components';
+import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { Home } from './pages/home/Home';
+import { Engine } from './pages/engine/Engine';
 
 function App() {
   return (
-    <div className="w-screen h-screen bg-zinc-950">
-      <Canvas camera={{ position: [0, 5, 12], fov: 60 }}>
-        <Scene />
-      </Canvas>
-    </div>
+    <BrowserRouter>
+      <Routes>
+        {/* Home - rota raiz */}
+        <Route path="/" element={<Home />} />
+
+        {/* Engine - cena 3D */}
+        <Route path="/engine" element={<Engine />} />
+      </Routes>
+    </BrowserRouter>
   );
 }
 
