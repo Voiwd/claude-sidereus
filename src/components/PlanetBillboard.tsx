@@ -48,9 +48,9 @@ export function PlanetBillboard({
   }
 
   return (
-    <Html center position={[0, 0, 0]} zIndexRange={[20, 0]}>
+    <Html center position={[0, 0, 0]} zIndexRange={[0, 20]}>
       <button
-        aria-label={`Focus ${label}`}
+        aria-label={`Focar em ${label}`}
         onPointerDown={handlePointerDown}
         onPointerLeave={() => {
           pointerStart.current = null;
@@ -59,12 +59,20 @@ export function PlanetBillboard({
         style={{
           width: diameter,
           height: diameter,
-          border: '2px solid rgba(255, 255, 255, 0.88)',
+          border: '2px solid rgba(237, 233, 227, 0.7)',
           borderRadius: '999px',
-          background: 'rgba(255, 255, 255, 0.12)',
-          boxShadow: '0 0 18px rgba(255, 255, 255, 0.38)',
+          background: 'rgba(237, 233, 227, 0.08)',
+          boxShadow: '0 0 18px var(--color-accent-glow)',
           cursor: 'pointer',
           padding: 0,
+          outline: 'none',
+        }}
+        onFocus={(e) => {
+          e.currentTarget.style.outline = '2px solid var(--color-accent)';
+          e.currentTarget.style.outlineOffset = '2px';
+        }}
+        onBlur={(e) => {
+          e.currentTarget.style.outline = 'none';
         }}
         title={label}
         type="button"

@@ -1,55 +1,12 @@
 import { useNavigate } from 'react-router-dom';
 import { useEffect, useRef, useState } from 'react';
-
-const ASTRO_CURIOSITIES = [
-  {
-    title: 'SOL',
-    fact: 'O Sol contém 99,86% de toda a massa do Sistema Solar. A cada segundo, converte 620 milhões de toneladas de hidrogênio em hélio.',
-  },
-  {
-    title: 'MERCÚRIO',
-    fact: 'Mercúrio é o planeta mais rápido do Sistema Solar, orbitando o Sol a cada 88 dias terrestres. Apesar de ser o mais próximo do Sol, não é o mais quente.',
-  },
-  {
-    title: 'VÊNUS',
-    fact: 'Vênus é o planeta mais quente do Sistema Solar com temperaturas de até 462°C. Sua atmosfera é 92 vezes mais densa que a da Terra.',
-  },
-  {
-    title: 'TERRA',
-    fact: 'A Terra é o único planeta conhecido com vida. Nosso planeta completa uma volta ao redor do Sol a cada 365,25 dias.',
-  },
-  {
-    title: 'MARTE',
-    fact: 'Marte é conhecido como o "Planeta Vermelho" devido ao óxido de ferro em sua superfície. Um dia em Marte dura 24 horas e 37 minutos.',
-  },
-  {
-    title: 'JÚPITER',
-    fact: 'Júpiter é o maior planeta do Sistema Solar. Uma tempestade chamada Grande Mancha Vermelha roda em sua atmosfera há mais de 300 anos.',
-  },
-  {
-    title: 'SATURNO',
-    fact: 'Saturno é famoso por seus anéis deslumbrantes, compostos por bilhões de partículas de gelo e rocha. É o segundo maior planeta.',
-  },
-  {
-    title: 'URANO',
-    fact: 'Urano rotaciona de lado, provavelmente devido a uma colisão há bilhões de anos. Tem uma cor azul-verde devido ao metano em sua atmosfera.',
-  },
-  {
-    title: 'NETUNO',
-    fact: 'Netuno é o planeta mais distante do Sol e tem os ventos mais fortes do Sistema Solar, atingindo 2.100 km/h.',
-  },
-  {
-    title: 'SISTEMA SOLAR',
-    fact: 'O Sistema Solar tem aproximadamente 4,6 bilhões de anos. Toda a vida que conhecemos existe em um raio de apenas 4,37 anos-luz.',
-  },
-];
+import { ASTRO_CURIOSITIES } from '../../data/facts';
 
 export function Home() {
   const navigate = useNavigate();
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [currentCuriosityIndex, setCurrentCuriosityIndex] = useState(0);
 
-  // Rotacionar curiosidades
   useEffect(() => {
     const interval = setInterval(() => {
       setCurrentCuriosityIndex((prev) => (prev + 1) % ASTRO_CURIOSITIES.length);
@@ -57,7 +14,6 @@ export function Home() {
     return () => clearInterval(interval);
   }, []);
 
-  // Animação de estrelas de fundo
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
@@ -68,17 +24,15 @@ export function Home() {
     const resizeCanvas = () => {
       canvas.width = window.innerWidth;
       canvas.height = window.innerHeight;
+      renderStars();
     };
 
-    resizeCanvas();
-    window.addEventListener('resize', resizeCanvas);
-
-    const drawStars = () => {
-      ctx.fillStyle = '#0a0a0a';
+    const renderStars = () => {
+      ctx.fillStyle = '#0c0b09';
       ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-      ctx.fillStyle = '#ffffff';
-      ctx.globalAlpha = 0.6;
+      ctx.fillStyle = '#ede9e3';
+      ctx.globalAlpha = 0.5;
 
       for (let i = 0; i < 150; i++) {
         const x = Math.random() * canvas.width;
@@ -90,85 +44,179 @@ export function Home() {
       ctx.globalAlpha = 1;
     };
 
-    drawStars();
-
-    return () => {
-      window.removeEventListener('resize', resizeCanvas);
-    };
+    resizeCanvas();
+    window.addEventListener('resize', resizeCanvas);
+    return () => window.removeEventListener('resize', resizeCanvas);
   }, []);
 
   const currentCuriosity = ASTRO_CURIOSITIES[currentCuriosityIndex];
 
   return (
-    <div className="relative w-screen h-screen overflow-hidden bg-black flex flex-col">
-      {/* Canvas de fundo com estrelas */}
-      <canvas ref={canvasRef} className="absolute inset-0 w-full h-full" />
+    <div
+      className="relative w-screen h-screen overflow-hidden flex flex-col"
+      style={{ background: 'var(--color-bg)' }}
+    >
+      <canvas
+        ref={canvasRef}
+        className="absolute inset-0 w-full h-full"
+        aria-hidden="true"
+      />
 
-      {/* Gradient overlay */}
-      <div className="absolute inset-0 bg-gradient-to-b from-black via-transparent to-black opacity-60" />
+      <div
+        className="absolute inset-0"
+        style={{
+          background:
+            'linear-gradient(to bottom, var(--color-bg) 0%, transparent 30%, transparent 70%, var(--color-bg) 100%)',
+          opacity: 0.7,
+        }}
+      />
 
-      {/* Conteúdo principal */}
       <div className="relative z-10 flex-1 flex flex-col items-center justify-center px-4 md:px-8">
-        {/* Header com menu */}
         <div className="w-full flex justify-between items-center mb-12 md:mb-16 absolute top-8 md:top-12">
-          {/* Logo/Título à esquerda */}
           <div className="text-left">
-            <h1 className="text-4xl md:text-6xl font-mono font-bold text-white tracking-wider">
+            <h1
+              style={{
+                fontFamily: 'var(--font-display)',
+                fontSize: 'clamp(2rem, 6vw, var(--text-display))',
+                fontWeight: 700,
+                color: 'var(--color-text-primary)',
+                letterSpacing: '0.12em',
+                margin: 0,
+              }}
+            >
               Sidereus
             </h1>
-            <p className="text-gray-400 text-xs md:text-sm font-mono italic">
+            <p
+              style={{
+                fontFamily: 'var(--font-data)',
+                fontSize: 'var(--text-micro)',
+                color: 'var(--color-text-muted)',
+                fontStyle: 'italic',
+                margin: '4px 0 0',
+                letterSpacing: '0.06em',
+              }}
+            >
               Sistema Solar Interativo
             </p>
           </div>
         </div>
 
-        {/* Descrição principal */}
         <div className="text-center mb-12 md:mb-16 max-w-3xl">
-          <p className="text-gray-300 text-sm md:text-lg font-mono leading-relaxed mb-8">
+          <p
+            style={{
+              fontFamily: 'var(--font-data)',
+              fontSize: 'var(--text-data)',
+              color: 'var(--color-text-secondary)',
+              letterSpacing: '0.04em',
+              marginBottom: '2rem',
+            }}
+          >
             Visualização Interativa do Sistema Solar
           </p>
-          <p className="text-gray-400 text-xs md:text-base font-mono leading-relaxed">
+          <p
+            style={{
+              fontFamily: 'var(--font-serif)',
+              fontSize: 'var(--text-body)',
+              color: 'var(--color-text-secondary)',
+              lineHeight: 1.7,
+              margin: 0,
+            }}
+          >
             Explore os astros do nosso sistema solar de forma interativa e
             educativa. Mergulhe em uma experiência visual que traz a
             grandiosidade do cosmos para suas mãos.
           </p>
         </div>
 
-        {/* CTA Principal - Botão grande */}
         <button
           onClick={() => navigate('/engine')}
-          className="px-10 md:px-16 py-4 md:py-6 bg-orange-500 hover:bg-orange-600 text-black font-mono font-bold text-base md:text-2xl rounded-lg transition-all duration-300 transform hover:scale-105 hover:shadow-lg hover:shadow-orange-500/50"
+          style={{
+            fontFamily: 'var(--font-display)',
+            fontSize: 'clamp(0.875rem, 2vw, 1.25rem)',
+            fontWeight: 700,
+            letterSpacing: '0.1em',
+            color: 'var(--color-bg)',
+            background: 'var(--color-accent)',
+            border: '1px solid var(--color-accent)',
+            borderRadius: 'var(--radius-md)',
+            padding: '14px 40px',
+            cursor: 'pointer',
+            transition: 'background 0.2s, box-shadow 0.2s',
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.background = 'var(--color-accent-warm)';
+            e.currentTarget.style.boxShadow =
+              '0 0 24px var(--color-accent-glow)';
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.background = 'var(--color-accent)';
+            e.currentTarget.style.boxShadow = 'none';
+          }}
+          onFocus={(e) => {
+            e.currentTarget.style.outline = '2px solid var(--color-accent)';
+            e.currentTarget.style.outlineOffset = '2px';
+          }}
+          onBlur={(e) => {
+            e.currentTarget.style.outline = 'none';
+          }}
+          type="button"
         >
           CONHEÇA OS ASTROS
         </button>
       </div>
 
-      {/* Curiosidade na base - Estilo "Death Screen" */}
-      <div className="relative z-20 bg-gradient-to-b from-transparent to-black border-t border-gray-700 px-4 md:px-8 py-4 md:py-6 backdrop-blur-sm">
+      <div
+        className="relative z-20 px-4 md:px-8 py-4 md:py-6"
+        style={{
+          borderTop: '1px solid var(--color-border)',
+          background: `linear-gradient(to bottom, transparent, var(--color-bg))`,
+          backdropFilter: 'blur(10px)',
+        }}
+      >
         <div className="max-w-4xl mx-auto">
-          {/* Título da curiosidade */}
           <div className="mb-2 md:mb-3">
-            <h3 className="text-orange-500 text-xs md:text-sm font-mono font-bold uppercase tracking-wider">
+            <h3
+              style={{
+                fontFamily: 'var(--font-data)',
+                fontSize: 'var(--text-label)',
+                fontWeight: 700,
+                letterSpacing: '0.12em',
+                color: 'var(--color-accent)',
+                margin: 0,
+                textTransform: 'uppercase',
+              }}
+            >
               {currentCuriosity.title}
             </h3>
           </div>
 
-          {/* Texto da curiosidade */}
-          <p className="text-gray-300 text-xs md:text-sm font-mono leading-relaxed mb-3 md:mb-4">
+          <p
+            style={{
+              fontFamily: 'var(--font-serif)',
+              fontSize: 'var(--text-body)',
+              color: 'var(--color-text-secondary)',
+              lineHeight: 1.65,
+              marginBottom: '12px',
+            }}
+          >
             {currentCuriosity.fact}
           </p>
 
-          {/* Controles - Próxima curiosidade */}
           <div className="flex items-center justify-center gap-2">
             <div className="flex gap-1">
               {ASTRO_CURIOSITIES.map((_, index) => (
                 <div
                   key={index}
-                  className={`h-1 w-2 rounded-full transition-all duration-300 ${
-                    index === currentCuriosityIndex
-                      ? 'bg-orange-500 w-4'
-                      : 'bg-gray-600'
-                  }`}
+                  style={{
+                    height: '3px',
+                    width: index === currentCuriosityIndex ? '16px' : '8px',
+                    borderRadius: 'var(--radius-sm)',
+                    background:
+                      index === currentCuriosityIndex
+                        ? 'var(--color-accent)'
+                        : 'var(--color-border)',
+                    transition: 'width 0.3s, background 0.3s',
+                  }}
                 />
               ))}
             </div>
@@ -178,18 +226,42 @@ export function Home() {
                   (prev) => (prev + 1) % ASTRO_CURIOSITIES.length
                 )
               }
-              className="ml-auto text-orange-500 hover:text-orange-400 text-xs md:text-sm font-mono font-bold transition flex items-center gap-2"
+              style={{
+                marginLeft: 'auto',
+                fontFamily: 'var(--font-display)',
+                fontSize: 'var(--text-label)',
+                fontWeight: 700,
+                letterSpacing: '0.08em',
+                color: 'var(--color-accent)',
+                background: 'none',
+                border: 'none',
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px',
+                padding: '4px 0',
+                transition: 'color 0.2s',
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.color = 'var(--color-accent-warm)';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.color = 'var(--color-accent)';
+              }}
+              onFocus={(e) => {
+                e.currentTarget.style.outline = '2px solid var(--color-accent)';
+                e.currentTarget.style.outlineOffset = '2px';
+              }}
+              onBlur={(e) => {
+                e.currentTarget.style.outline = 'none';
+              }}
+              type="button"
             >
-              PRÓXIMA DICA
-              <span className="text-lg">→</span>
+              PRÓXIMA DICA <span aria-hidden="true">→</span>
             </button>
           </div>
         </div>
       </div>
-
-      {/* Efeito de orbs no fundo */}
-      <div className="absolute top-10 right-10 w-32 h-32 md:w-48 md:h-48 rounded-full bg-orange-500 opacity-5 blur-3xl" />
-      <div className="absolute bottom-40 left-5 w-40 h-40 md:w-64 md:h-64 rounded-full bg-blue-500 opacity-5 blur-3xl" />
     </div>
   );
 }
