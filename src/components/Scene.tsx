@@ -2,7 +2,7 @@ import { OrbitControls, Stars } from '@react-three/drei';
 import { Planet } from './Planet';
 import { PLANETS, type PlanetData } from '../data/planets';
 import { useStore } from '../store/useStore';
-import { useRef, useState } from 'react';
+import { useCallback, useRef, useState } from 'react';
 import { useFrame, useThree } from '@react-three/fiber';
 import { Vector3 } from 'three';
 import type { OrbitControls as OrbitControlsImpl } from 'three-stdlib';
@@ -42,14 +42,19 @@ export function Scene() {
     }
   });
 
-  const handleSelect = (planet: PlanetData) => {
-    const [x, y, z] = planet.position;
-    setFocusedPlanetId(planet.id);
-    setTarget({
-      lookAt: new Vector3(x, y, z),
-      distance: Math.max(planet.radius * 3, 18),
-    });
-  };
+  // Stable across re-renders: setFocusedPlanetId is a Zustand action (stable
+  // reference), and setTarget is a useState setter (also stable).
+  const handleSelect = useCallback(
+    (planet: PlanetData) => {
+      const [x, y, z] = planet.position;
+      setFocusedPlanetId(planet.id);
+      setTarget({
+        lookAt: new Vector3(x, y, z),
+        distance: Math.max(planet.radius * 3, 18),
+      });
+    },
+    [setFocusedPlanetId]
+  );
 
   return (
     <>
