@@ -61,3 +61,26 @@ body,
   color: var(--color-text-primary);
   font-family: var(--font-display);
 }
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  overflow-x: hidden;
+}
+
+::selection {
+  background: rgba(232, 118, 26, 0.32);
+  color: #ede9e3;
+}
+
+@keyframes sid-bob {
+  0%,
+  100% {
+    transform: translate(-50%, 0);
+  }
+  50% {
+    transform: translate(-50%, 7px);
+  }
+}
