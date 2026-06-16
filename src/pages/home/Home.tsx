@@ -1,6 +1,7 @@
 import { useNavigate } from 'react-router-dom';
 import { useEffect, useRef, useState } from 'react';
 import * as THREE from 'three';
+import { PLANETS, getPlanetById } from '../../data/planets';
 
 const HEADLINE = 'Sidereus';
 const SUBTITLE =
@@ -11,57 +12,18 @@ const CAROUSEL_SECONDS = 8;
 const ROTATION_SPEED = 0.04;
 const PARALLAX = 1;
 
-type Astro = { name: string; kind: string; text: string };
+// Single source of truth: the curiosities carousel reuses the same celestial-body
+// data the /engine scene renders from, so descriptions stay in sync across the app.
+const ASTROS = PLANETS.map((p) => ({
+  name: p.name,
+  kind: p.type,
+  text: p.description,
+}));
 
-const ASTROS: Astro[] = [
-  {
-    name: 'Sol',
-    kind: 'Estrela',
-    text: 'O Sol concentra 99,86% de toda a massa do Sistema Solar e converte cerca de 620 milhões de toneladas de hidrogênio em hélio a cada segundo.',
-  },
-  {
-    name: 'Mercúrio',
-    kind: 'Planeta',
-    text: 'O menor planeta vive de extremos: passa de 430 °C no lado iluminado para -180 °C no lado escuro, sem atmosfera que segure o calor.',
-  },
-  {
-    name: 'Vênus',
-    kind: 'Planeta',
-    text: 'Gira tão devagar que um dia venusiano dura mais que seu próprio ano. Sua atmosfera densa faz dele o planeta mais quente do sistema.',
-  },
-  {
-    name: 'Terra',
-    kind: 'Planeta',
-    text: 'O único mundo conhecido com vida. 71% de sua superfície é coberta por água líquida — um frágil oásis azul suspenso no escuro.',
-  },
-  {
-    name: 'Marte',
-    kind: 'Planeta',
-    text: 'Abriga o Monte Olimpo, o maior vulcão do Sistema Solar: quase três vezes a altura do Everest, com 600 km de base.',
-  },
-  {
-    name: 'Júpiter',
-    kind: 'Planeta',
-    text: 'O gigante gasoso é tão grande que caberiam mais de 1.300 Terras em seu interior. A Grande Mancha Vermelha é uma tempestade de séculos.',
-  },
-  {
-    name: 'Saturno',
-    kind: 'Planeta',
-    text: 'Seus anéis se estendem por até 280 mil km, mas têm em média apenas cerca de 10 metros de espessura — finos como uma folha de papel.',
-  },
-  {
-    name: 'Urano',
-    kind: 'Planeta',
-    text: 'Gira deitado de lado, com o eixo inclinado a 98°. Cada polo passa 42 anos sob luz solar contínua e depois 42 anos na escuridão.',
-  },
-  {
-    name: 'Netuno',
-    kind: 'Planeta',
-    text: 'O planeta mais distante e ventoso: suas rajadas ultrapassam 2.000 km/h, os ventos mais rápidos já medidos no Sistema Solar.',
-  },
-];
+// The hero globe loads the very same Earth texture the engine uses for its Terra.
+const EARTH_TEXTURE = getPlanetById('terra')!.texture;
 
-/** WebGL night-Earth globe with a parallaxing star field, painted only while the hero is visible. */
+/** WebGL Earth globe (engine's Terra texture) with a parallaxing star field, painted only while the hero is visible. */
 function HeroGlobe() {
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -88,9 +50,9 @@ function HeroGlobe() {
     el.appendChild(renderer.domElement);
     renderer.domElement.style.display = 'block';
 
-    // lights
-    scene.add(new THREE.AmbientLight(0x24344c, 0.5));
-    const dir = new THREE.DirectionalLight(0x9fc0ff, 0.55);
+    // lights — lit day-earth, consistent with the /engine scene
+    scene.add(new THREE.AmbientLight(0x3a4456, 0.55));
+    const dir = new THREE.DirectionalLight(0xfff2dc, 1.7);
     dir.position.set(1, 0.35, 0.7);
     scene.add(dir);
 
@@ -102,8 +64,7 @@ function HeroGlobe() {
     scene.add(earthGroup);
 
     const mat = new THREE.MeshStandardMaterial({
-      color: 0x0a1626,
-      emissive: 0x000000,
+      color: 0x223044,
       metalness: 0.05,
       roughness: 0.92,
     });
@@ -112,21 +73,12 @@ function HeroGlobe() {
     earthGroup.add(earth);
 
     const loader = new THREE.TextureLoader();
-    loader.setCrossOrigin('anonymous');
-    loader.load(
-      'https://unpkg.com/three-globe/example/img/earth-night.jpg',
-      (tex) => {
-        tex.colorSpace = THREE.SRGBColorSpace;
-        mat.map = tex;
-        mat.emissiveMap = tex;
-        mat.emissive = new THREE.Color(0xffd49a);
-        mat.emissiveIntensity = 2.7;
-        mat.color = new THREE.Color(0x1b2740);
-        mat.needsUpdate = true;
-      },
-      undefined,
-      () => {}
-    );
+    loader.load(EARTH_TEXTURE, (tex) => {
+      tex.colorSpace = THREE.SRGBColorSpace;
+      mat.map = tex;
+      mat.color = new THREE.Color(0xffffff);
+      mat.needsUpdate = true;
+    });
 
     // atmosphere — single smooth blue rim on the limb
     const atmVert =
@@ -280,7 +232,7 @@ function HeroGlobe() {
 }
 
 const sectionLabel: React.CSSProperties = {
-  fontFamily: "'Geo', 'Press Start 2P', monospace",
+  fontFamily: 'var(--font-ui)',
   letterSpacing: '0.16em',
   color: 'var(--color-accent)',
   textTransform: 'uppercase',
@@ -415,7 +367,7 @@ export function Home() {
         width: '100%',
         background: 'var(--color-bg)',
         color: 'var(--color-text-primary)',
-        fontFamily: "'Outfit', Inter, sans-serif",
+        fontFamily: 'var(--font-body)',
       }}
     >
       {/* HERO */}
@@ -463,7 +415,7 @@ export function Home() {
         >
           <h1
             style={{
-              fontFamily: "'Courier Prime', monospace",
+              fontFamily: 'var(--font-display)',
               fontWeight: 700,
               fontSize: 'clamp(54px,8vw,116px)',
               letterSpacing: '-0.025em',
@@ -487,7 +439,7 @@ export function Home() {
           </h1>
           <p
             style={{
-              fontFamily: "'Outfit', sans-serif",
+              fontFamily: 'var(--font-body)',
               fontWeight: 300,
               fontSize: 'clamp(14px,1.2vw,18px)',
               lineHeight: 1.66,
@@ -538,7 +490,7 @@ export function Home() {
         >
           <span
             style={{
-              fontFamily: "'Geo', 'Press Start 2P', monospace",
+              fontFamily: 'var(--font-ui)',
               fontSize: 'clamp(11px,0.85vw,13px)',
               letterSpacing: '0.18em',
               color: '#8a8176',
@@ -580,7 +532,7 @@ export function Home() {
             </div>
             <h2
               style={{
-                fontFamily: "'Courier Prime', monospace",
+                fontFamily: 'var(--font-display)',
                 fontWeight: 700,
                 fontSize: 'clamp(28px,3.6vw,46px)',
                 lineHeight: 1.18,
@@ -596,7 +548,7 @@ export function Home() {
           <div style={{ paddingTop: 'clamp(4px,2vh,28px)' }}>
             <p
               style={{
-                fontFamily: "'Outfit', sans-serif",
+                fontFamily: 'var(--font-body)',
                 fontWeight: 300,
                 fontSize: 'clamp(16px,1.3vw,19px)',
                 lineHeight: 1.72,
@@ -681,7 +633,7 @@ export function Home() {
         </div>
         <h2
           style={{
-            fontFamily: "'Courier Prime', monospace",
+            fontFamily: 'var(--font-display)',
             fontWeight: 700,
             fontSize: 'clamp(30px,4vw,52px)',
             lineHeight: 1.16,
@@ -746,7 +698,7 @@ export function Home() {
                 >
                   <span
                     style={{
-                      fontFamily: "'Geo', 'Press Start 2P', monospace",
+                      fontFamily: 'var(--font-ui)',
                       fontSize: 'clamp(16px,1.3vw,20px)',
                       letterSpacing: '0.14em',
                       color: 'var(--color-accent)',
@@ -757,7 +709,7 @@ export function Home() {
                   </span>
                   <span
                     style={{
-                      fontFamily: "'Geo', 'Press Start 2P', monospace",
+                      fontFamily: 'var(--font-ui)',
                       fontSize: 'clamp(10px,0.8vw,12px)',
                       letterSpacing: '0.12em',
                       color: '#8a8176',
@@ -772,7 +724,7 @@ export function Home() {
                 </div>
                 <p
                   style={{
-                    fontFamily: "'Outfit', sans-serif",
+                    fontFamily: 'var(--font-body)',
                     fontWeight: 300,
                     fontSize: 'clamp(14px,1.15vw,17px)',
                     lineHeight: 1.62,
@@ -840,7 +792,7 @@ export function Home() {
                   goTip((carIndex + 1) % ASTROS.length);
                 }}
                 style={{
-                  fontFamily: "'Geo', 'Press Start 2P', monospace",
+                  fontFamily: 'var(--font-ui)',
                   fontSize: 'clamp(12px,0.95vw,14px)',
                   letterSpacing: '0.14em',
                   color: 'var(--color-accent)',
@@ -877,7 +829,7 @@ export function Home() {
           >
             <span
               style={{
-                fontFamily: "'Courier Prime', monospace",
+                fontFamily: 'var(--font-display)',
                 fontWeight: 700,
                 fontSize: 'clamp(16px,1.4vw,19px)',
                 color: 'var(--color-text-primary)',
@@ -888,7 +840,7 @@ export function Home() {
             </span>
             <span
               style={{
-                fontFamily: "'Geo', 'Press Start 2P', monospace",
+                fontFamily: 'var(--font-ui)',
                 fontSize: 'clamp(10px,0.8vw,12px)',
                 letterSpacing: '0.16em',
                 color: 'var(--color-text-muted)',
@@ -927,7 +879,7 @@ function HeroCta({
       style={{
         background: 'var(--color-accent)',
         color: 'var(--color-bg)',
-        fontFamily: "'Geo', 'Press Start 2P', monospace",
+        fontFamily: 'var(--font-ui)',
         fontSize: 'clamp(16px,1.35vw,20px)',
         letterSpacing: '0.1em',
         textTransform: 'capitalize',
@@ -979,7 +931,7 @@ function FinalCta({ onClick }: { onClick: (e: React.MouseEvent) => void }) {
       style={{
         background: 'var(--color-accent)',
         color: 'var(--color-bg)',
-        fontFamily: "'Geo', 'Press Start 2P', monospace",
+        fontFamily: 'var(--font-ui)',
         fontSize: 'clamp(12px,1vw,14px)',
         letterSpacing: '0.12em',
         textTransform: 'capitalize',
@@ -1043,7 +995,7 @@ function FeatureCard({
     >
       <span
         style={{
-          fontFamily: "'Geo', 'Press Start 2P', monospace",
+          fontFamily: 'var(--font-ui)',
           fontSize: 'clamp(14px,1.1vw,17px)',
           letterSpacing: '0.12em',
           color: 'var(--color-accent)',
@@ -1053,7 +1005,7 @@ function FeatureCard({
       </span>
       <h3
         style={{
-          fontFamily: "'Courier Prime', monospace",
+          fontFamily: 'var(--font-display)',
           fontWeight: 700,
           fontSize: 'clamp(18px,1.55vw,23px)',
           color: 'var(--color-text-primary)',
@@ -1064,7 +1016,7 @@ function FeatureCard({
       </h3>
       <p
         style={{
-          fontFamily: "'Outfit', sans-serif",
+          fontFamily: 'var(--font-body)',
           fontWeight: 300,
           fontSize: 'clamp(14px,1.05vw,15.5px)',
           lineHeight: 1.62,

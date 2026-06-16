@@ -23,10 +23,15 @@
   --color-warning: #d4882a;
   --color-error: #c04a3f;
 
-  /* Tipografia — três famílias com papéis distintos */
-  --font-display: 'Courier Prime', monospace;
-  --font-serif: 'Source Serif 4', Georgia, serif;
-  --font-data: 'IBM Plex Mono', monospace;
+  /* Tipografia — três famílias dedicadas (visual-identity.md v1.2) */
+  --font-display: 'CS Daine Mono', 'Courier Prime', monospace; /* logo, títulos */
+  --font-ui: 'Geo', 'Press Start 2P', monospace; /* HUD, labels, CTAs */
+  --font-body: 'Outfit', 'Inter', sans-serif; /* corpo, dados */
+
+  /* Aliases legados → mapeados para as famílias dedicadas.
+     A identidade v1.2 não usa mais serif nem mono de dados: corpo e dados são Outfit. */
+  --font-serif: var(--font-body);
+  --font-data: var(--font-body);
 
   /* Escala tipográfica */
   --text-display: 2.5rem;
