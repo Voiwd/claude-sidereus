@@ -49,7 +49,6 @@ export function Home() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [currentCuriosityIndex, setCurrentCuriosityIndex] = useState(0);
 
-  // Rotacionar curiosidades
   useEffect(() => {
     const interval = setInterval(() => {
       setCurrentCuriosityIndex((prev) => (prev + 1) % ASTRO_CURIOSITIES.length);
@@ -57,7 +56,6 @@ export function Home() {
     return () => clearInterval(interval);
   }, []);
 
-  // Animação de estrelas de fundo
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
@@ -65,22 +63,17 @@ export function Home() {
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
-    const resizeCanvas = () => {
+    const drawStars = () => {
       canvas.width = window.innerWidth;
       canvas.height = window.innerHeight;
-    };
 
-    resizeCanvas();
-    window.addEventListener('resize', resizeCanvas);
-
-    const drawStars = () => {
-      ctx.fillStyle = '#0a0a0a';
+      ctx.fillStyle = '#0c0b09';
       ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-      ctx.fillStyle = '#ffffff';
-      ctx.globalAlpha = 0.6;
+      ctx.fillStyle = '#ede9e3';
+      ctx.globalAlpha = 0.5;
 
-      for (let i = 0; i < 150; i++) {
+      for (let i = 0; i < 200; i++) {
         const x = Math.random() * canvas.width;
         const y = Math.random() * canvas.height;
         const size = Math.random() * 1.5;
@@ -92,31 +85,53 @@ export function Home() {
 
     drawStars();
 
-    return () => {
-      window.removeEventListener('resize', resizeCanvas);
-    };
+    const handleResize = () => drawStars();
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
   }, []);
 
   const currentCuriosity = ASTRO_CURIOSITIES[currentCuriosityIndex];
 
   return (
-    <div className="relative w-screen h-screen overflow-hidden bg-black flex flex-col">
+    <div
+      className="relative w-screen h-screen overflow-hidden flex flex-col"
+      style={{ backgroundColor: 'var(--color-bg)' }}
+    >
       {/* Canvas de fundo com estrelas */}
       <canvas ref={canvasRef} className="absolute inset-0 w-full h-full" />
 
       {/* Gradient overlay */}
-      <div className="absolute inset-0 bg-gradient-to-b from-black via-transparent to-black opacity-60" />
+      <div
+        className="absolute inset-0"
+        style={{
+          background:
+            'linear-gradient(to bottom, rgba(12,11,9,0.7) 0%, transparent 40%, rgba(12,11,9,0.8) 100%)',
+        }}
+      />
 
       {/* Conteúdo principal */}
       <div className="relative z-10 flex-1 flex flex-col items-center justify-center px-4 md:px-8">
-        {/* Header com menu */}
+        {/* Header */}
         <div className="w-full flex justify-between items-center mb-12 md:mb-16 absolute top-8 md:top-12">
-          {/* Logo/Título à esquerda */}
           <div className="text-left">
-            <h1 className="text-4xl md:text-6xl font-mono font-bold text-white tracking-wider">
+            <h1
+              className="font-bold tracking-wider"
+              style={{
+                fontFamily: 'var(--font-display)',
+                fontSize: 'var(--text-display)',
+                color: 'var(--color-text-primary)',
+              }}
+            >
               Sidereus
             </h1>
-            <p className="text-gray-400 text-xs md:text-sm font-mono italic">
+            <p
+              className="italic"
+              style={{
+                fontFamily: 'var(--font-display)',
+                fontSize: 'var(--text-label)',
+                color: 'var(--color-text-secondary)',
+              }}
+            >
               Sistema Solar Interativo
             </p>
           </div>
@@ -124,51 +139,117 @@ export function Home() {
 
         {/* Descrição principal */}
         <div className="text-center mb-12 md:mb-16 max-w-3xl">
-          <p className="text-gray-300 text-sm md:text-lg font-mono leading-relaxed mb-8">
+          <p
+            className="leading-relaxed mb-6"
+            style={{
+              fontFamily: 'var(--font-display)',
+              fontSize: 'var(--text-subtitle)',
+              color: 'var(--color-text-secondary)',
+            }}
+          >
             Visualização Interativa do Sistema Solar
           </p>
-          <p className="text-gray-400 text-xs md:text-base font-mono leading-relaxed">
+          <p
+            className="leading-relaxed"
+            style={{
+              fontFamily: 'var(--font-serif)',
+              fontSize: 'var(--text-body)',
+              color: 'var(--color-text-secondary)',
+            }}
+          >
             Explore os astros do nosso sistema solar de forma interativa e
             educativa. Mergulhe em uma experiência visual que traz a
             grandiosidade do cosmos para suas mãos.
           </p>
         </div>
 
-        {/* CTA Principal - Botão grande */}
+        {/* CTA Principal */}
         <button
           onClick={() => navigate('/engine')}
-          className="px-10 md:px-16 py-4 md:py-6 bg-orange-500 hover:bg-orange-600 text-black font-mono font-bold text-base md:text-2xl rounded-lg transition-all duration-300 transform hover:scale-105 hover:shadow-lg hover:shadow-orange-500/50"
+          className="transition-all duration-300 hover:scale-105"
+          style={{
+            padding: '14px 48px',
+            backgroundColor: 'var(--color-accent)',
+            color: '#0c0b09',
+            fontFamily: 'var(--font-display)',
+            fontSize: 'var(--text-data)',
+            fontWeight: 700,
+            letterSpacing: '0.1em',
+            borderRadius: 'var(--radius-md)',
+            border: 'none',
+            cursor: 'pointer',
+            boxShadow: '0 0 24px var(--color-accent-glow)',
+          }}
+          onMouseEnter={(e) => {
+            (e.currentTarget as HTMLButtonElement).style.backgroundColor =
+              'var(--color-accent-warm)';
+          }}
+          onMouseLeave={(e) => {
+            (e.currentTarget as HTMLButtonElement).style.backgroundColor =
+              'var(--color-accent)';
+          }}
         >
           CONHEÇA OS ASTROS
         </button>
       </div>
 
-      {/* Curiosidade na base - Estilo "Death Screen" */}
-      <div className="relative z-20 bg-gradient-to-b from-transparent to-black border-t border-gray-700 px-4 md:px-8 py-4 md:py-6 backdrop-blur-sm">
+      {/* Curiosidade na base */}
+      <div
+        className="relative z-20 px-4 md:px-8 py-4 md:py-6"
+        style={{
+          borderTop: '1px solid var(--color-border)',
+          background:
+            'linear-gradient(to bottom, transparent, rgba(12,11,9,0.95))',
+          backdropFilter: 'blur(10px)',
+        }}
+      >
         <div className="max-w-4xl mx-auto">
-          {/* Título da curiosidade */}
           <div className="mb-2 md:mb-3">
-            <h3 className="text-orange-500 text-xs md:text-sm font-mono font-bold uppercase tracking-wider">
+            <h3
+              className="uppercase tracking-wider"
+              style={{
+                fontFamily: 'var(--font-display)',
+                fontSize: 'var(--text-label)',
+                fontWeight: 700,
+                color: 'var(--color-accent)',
+              }}
+            >
               {currentCuriosity.title}
             </h3>
           </div>
 
-          {/* Texto da curiosidade */}
-          <p className="text-gray-300 text-xs md:text-sm font-mono leading-relaxed mb-3 md:mb-4">
+          <p
+            className="leading-relaxed mb-3 md:mb-4"
+            style={{
+              fontFamily: 'var(--font-serif)',
+              fontSize: 'var(--text-data)',
+              color: 'var(--color-text-secondary)',
+            }}
+          >
             {currentCuriosity.fact}
           </p>
 
-          {/* Controles - Próxima curiosidade */}
-          <div className="flex items-center justify-center gap-2">
+          {/* Controles do carrossel */}
+          <div className="flex items-center gap-2">
             <div className="flex gap-1">
               {ASTRO_CURIOSITIES.map((_, index) => (
-                <div
+                <button
                   key={index}
-                  className={`h-1 w-2 rounded-full transition-all duration-300 ${
-                    index === currentCuriosityIndex
-                      ? 'bg-orange-500 w-4'
-                      : 'bg-gray-600'
-                  }`}
+                  onClick={() => setCurrentCuriosityIndex(index)}
+                  aria-label={`Ver dica ${index + 1}`}
+                  style={{
+                    height: 4,
+                    width: index === currentCuriosityIndex ? 16 : 8,
+                    borderRadius: 'var(--radius-sm)',
+                    border: 'none',
+                    cursor: 'pointer',
+                    padding: 0,
+                    transition: 'all 300ms',
+                    backgroundColor:
+                      index === currentCuriosityIndex
+                        ? 'var(--color-accent)'
+                        : 'var(--color-text-muted)',
+                  }}
                 />
               ))}
             </div>
@@ -178,18 +259,43 @@ export function Home() {
                   (prev) => (prev + 1) % ASTRO_CURIOSITIES.length
                 )
               }
-              className="ml-auto text-orange-500 hover:text-orange-400 text-xs md:text-sm font-mono font-bold transition flex items-center gap-2"
+              className="ml-auto flex items-center gap-2 transition-colors"
+              style={{
+                fontFamily: 'var(--font-display)',
+                fontSize: 'var(--text-label)',
+                fontWeight: 700,
+                color: 'var(--color-accent)',
+                background: 'none',
+                border: 'none',
+                cursor: 'pointer',
+              }}
+              onMouseEnter={(e) => {
+                (e.currentTarget as HTMLButtonElement).style.color =
+                  'var(--color-accent-warm)';
+              }}
+              onMouseLeave={(e) => {
+                (e.currentTarget as HTMLButtonElement).style.color =
+                  'var(--color-accent)';
+              }}
             >
-              PRÓXIMA DICA
-              <span className="text-lg">→</span>
+              PRÓXIMA DICA <span style={{ fontSize: '1rem' }}>→</span>
             </button>
           </div>
         </div>
       </div>
 
-      {/* Efeito de orbs no fundo */}
-      <div className="absolute top-10 right-10 w-32 h-32 md:w-48 md:h-48 rounded-full bg-orange-500 opacity-5 blur-3xl" />
-      <div className="absolute bottom-40 left-5 w-40 h-40 md:w-64 md:h-64 rounded-full bg-blue-500 opacity-5 blur-3xl" />
+      {/* Orb decorativo âmbar (único — removido o azul que violava o design) */}
+      <div
+        className="absolute rounded-full blur-3xl pointer-events-none"
+        style={{
+          top: 40,
+          right: 40,
+          width: 192,
+          height: 192,
+          backgroundColor: 'var(--color-accent)',
+          opacity: 0.04,
+        }}
+      />
     </div>
   );
 }

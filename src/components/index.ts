@@ -1,11 +1,5 @@
-export { Sun } from './Sun';
-export { Mercury } from './Mercury';
-export { Venus } from './Venus';
-export { Earth } from './Earth';
-export { Mars } from './Mars';
-export { Jupiter } from './Jupiter';
-export { Saturn } from './Saturn';
-export { Uranus } from './Uranus';
-export { Neptune } from './Neptune';
+export { Planet } from './Planet';
+export { PlanetBillboard } from './PlanetBillboard';
+export { PlanetPanel } from './PlanetPanel';
 export { Scene } from './Scene';
-export type { PlanetProps } from './types';
+export type { PlanetData } from '../data/planets';

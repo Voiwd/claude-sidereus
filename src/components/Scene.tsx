@@ -1,14 +1,8 @@
 import { OrbitControls, Stars } from '@react-three/drei';
-import { Sun } from './Sun';
-import { Mercury } from './Mercury';
-import { Venus } from './Venus';
-import { Earth } from './Earth';
-import { Mars } from './Mars';
-import { Jupiter } from './Jupiter';
-import { Saturn } from './Saturn';
-import { Uranus } from './Uranus';
-import { Neptune } from './Neptune';
-import { useRef, useState } from 'react';
+import { Planet } from './Planet';
+import { PLANETS, type PlanetData } from '../data/planets';
+import { useStore } from '../store/useStore';
+import { useCallback, useRef, useState } from 'react';
 import { useFrame, useThree } from '@react-three/fiber';
 import { Vector3 } from 'three';
 import type { OrbitControls as OrbitControlsImpl } from 'three-stdlib';
@@ -16,7 +10,7 @@ import type { OrbitControls as OrbitControlsImpl } from 'three-stdlib';
 export function Scene() {
   const controlsRef = useRef<OrbitControlsImpl | null>(null);
   const { camera } = useThree();
-  const [focusedPlanet, setFocusedPlanet] = useState<string | null>(null);
+  const { focusedPlanetId, setFocusedPlanetId } = useStore();
   const [target, setTarget] = useState<{
     lookAt: Vector3;
     distance: number;
@@ -48,16 +42,19 @@ export function Scene() {
     }
   });
 
-  const handleSelect = (
-    name: string,
-    pos: [number, number, number],
-    radius: number
-  ) => {
-    const lookAt = new Vector3(pos[0], pos[1], pos[2]);
-    const distance = Math.max(radius * 3, 18);
-    setFocusedPlanet(name);
-    setTarget({ lookAt, distance });
-  };
+  // Stable across re-renders: setFocusedPlanetId is a Zustand action (stable
+  // reference), and setTarget is a useState setter (also stable).
+  const handleSelect = useCallback(
+    (planet: PlanetData) => {
+      const [x, y, z] = planet.position;
+      setFocusedPlanetId(planet.id);
+      setTarget({
+        lookAt: new Vector3(x, y, z),
+        distance: Math.max(planet.radius * 3, 18),
+      });
+    },
+    [setFocusedPlanetId]
+  );
 
   return (
     <>
@@ -71,114 +68,14 @@ export function Scene() {
       />
       <ambientLight intensity={0.2} />
 
-      <Sun
-        position={[100, 0, 0]}
-        texture={
-          new URL('../assets/textures/sol/2k_sun.jpg', import.meta.url).href
-        }
-        radius={30}
-        name="Sol"
-        isFocused={focusedPlanet === 'Sol'}
-        onClick={() => handleSelect('Sol', [100, 0, 0], 30)}
-      />
-      <Mercury
-        position={[30, 0, 0]}
-        texture={
-          new URL('../assets/textures/mercurio/2k_mercury.jpg', import.meta.url)
-            .href
-        }
-        radius={1}
-        name="Mercury"
-        isFocused={focusedPlanet === 'Mercury'}
-        onClick={() => handleSelect('Mercury', [30, 0, 0], 1)}
-      />
-      <Venus
-        position={[15, 0, 0]}
-        texture={
-          new URL(
-            '../assets/textures/venus/2k_venus_surface.jpg',
-            import.meta.url
-          ).href
-        }
-        radius={1.5}
-        name="Venus"
-        isFocused={focusedPlanet === 'Venus'}
-        onClick={() => handleSelect('Venus', [15, 0, 0], 1.5)}
-      />
-      <Earth
-        position={[0, 0, 0]}
-        texture={
-          new URL(
-            '../assets/textures/terra/2k_earth_daymap.jpg',
-            import.meta.url
-          ).href
-        }
-        radius={4}
-        name="Earth"
-        isFocused={focusedPlanet === 'Earth'}
-        onClick={() => handleSelect('Earth', [0, 0, 0], 4)}
-      />
-      <Mars
-        position={[-40, 0, 0]}
-        texture={
-          new URL('../assets/textures/marte/2k_mars.jpg', import.meta.url).href
-        }
-        radius={2}
-        name="Mars"
-        isFocused={focusedPlanet === 'Mars'}
-        onClick={() => handleSelect('Mars', [-40, 0, 0], 2)}
-      />
-      <Jupiter
-        position={[-80, 0, 0]}
-        texture={
-          new URL('../assets/textures/jupter/2k_jupiter.jpg', import.meta.url)
-            .href
-        }
-        texture2=""
-        radius={2}
-        name="Jupiter"
-        isFocused={focusedPlanet === 'Jupiter'}
-        onClick={() => handleSelect('Jupiter', [-80, 0, 0], 2)}
-      />
-      <Saturn
-        position={[-130, 0, 0]}
-        texture={
-          new URL('../assets/textures/saturno/2k_saturn.jpg', import.meta.url)
-            .href
-        }
-        texture2={
-          new URL(
-            '../assets/textures/saturno/2k_saturn_ring_alpha.png',
-            import.meta.url
-          ).href
-        }
-        radius={5}
-        name="Saturn"
-        isFocused={focusedPlanet === 'Saturn'}
-        onClick={() => handleSelect('Saturn', [-130, 0, 0], 5)}
-      />
-      <Uranus
-        position={[-160, 0, 0]}
-        texture={
-          new URL('../assets/textures/urano/2k_uranus.jpg', import.meta.url)
-            .href
-        }
-        radius={3}
-        name="Uranus"
-        isFocused={focusedPlanet === 'Uranus'}
-        onClick={() => handleSelect('Uranus', [-160, 0, 0], 3)}
-      />
-      <Neptune
-        position={[-190, 0, 0]}
-        texture={
-          new URL('../assets/textures/netuno/2k_neptune.jpg', import.meta.url)
-            .href
-        }
-        radius={3}
-        name="Neptune"
-        isFocused={focusedPlanet === 'Neptune'}
-        onClick={() => handleSelect('Neptune', [-190, 0, 0], 3)}
-      />
+      {PLANETS.map((planet) => (
+        <Planet
+          key={planet.id}
+          data={planet}
+          isFocused={focusedPlanetId === planet.id}
+          onSelect={() => handleSelect(planet)}
+        />
+      ))}
 
       <OrbitControls
         ref={controlsRef}
