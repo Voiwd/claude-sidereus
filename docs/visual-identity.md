@@ -129,13 +129,13 @@ Período Orbital                    ← text-label, Geo, text-muted
 
 | Elemento                | Border radius |
 | ----------------------- | ------------- |
-| Painel lateral / modais | `4px`         |
-| Botões                  | `2px`         |
-| Badges / tags           | `1px`         |
-| Inputs                  | `2px`         |
-| Tooltips                | `1px`         |
+| Painel lateral / modais | `8px`         |
+| Botões                  | `6px`         |
+| Badges / tags           | `4px`         |
+| Inputs                  | `6px`         |
+| Tooltips                | `4px`         |
 
-> Cantos quase retos — coerentes com estética pixel/retro. Evitar qualquer arredondamento maior que 6px.
+> Arredondamento moderado — coerente com gamificado moderno (painel de RPG, UI de indie sci-fi). Evitar valores acima de 12px, que remetem a apps mobile genéricos.
 
 ### 4.2 Bordas
 
@@ -284,13 +284,12 @@ Aplicado via `@react-three/postprocessing` dentro do `<Canvas>` do `/engine`:
 
 ## 8. O que evitar
 
-- **Azul como tom de fundo** — os neutros quentes são intencionais e não negociáveis.
-- **Roxo/violeta** — fora da identidade.
+- **Azul, roxo ou frio como tom dominante de fundo** — o fundo global deve ser neutro escuro (quente ou neutro puro). Azul/roxo podem aparecer como acentos secundários, efeitos de planetas, ou destaques pontuais — nunca como paleta de base.
 - **Branco puro (`#FFFFFF`)** — usar `--color-text-primary` (`#EDE9E3`).
 - **Geo em textos longos** — pixel font em parágrafos é ilegível. Máximo de ~4 palavras por instância.
 - **CS Daine Mono em corpo de texto** — reservar para títulos e hierarquias altas.
-- **Gradientes horizontais coloridos como decoração** — se usar gradiente, radial e sutil, centrado no accent.
-- **Border radius maior que 6px** — cantos retos são parte da estética pixel.
+- **Gradientes horizontais coloridos como decoração** — se usar gradiente, radial e sutil.
+- **Border radius acima de 12px** — valores maiores remetem a apps mobile genéricos.
 - **Scanlines ou ChromaticAberration em intensidade alta** — o efeito deve ser subliminar, não o ponto focal.
 
 ---
