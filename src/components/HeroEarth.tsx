@@ -47,10 +47,10 @@ function EarthMesh() {
 
   useFrame((state, delta) => {
     if (earthRef.current) earthRef.current.rotation.y += 0.04 * delta;
-    cur.current.x += (mouse.current.x - cur.current.x) * 0.045;
-    cur.current.y += (mouse.current.y - cur.current.y) * 0.045;
-    state.camera.position.x = cur.current.x * 0.8;
-    state.camera.position.y = -cur.current.y * 0.5;
+    cur.current.x += (mouse.current.x - cur.current.x) * 0.055;
+    cur.current.y += (mouse.current.y - cur.current.y) * 0.055;
+    state.camera.position.x = cur.current.x * 1.6;
+    state.camera.position.y = -cur.current.y * 1.1;
     state.camera.lookAt(0, 0, 0);
   });
 
@@ -90,10 +90,10 @@ export function HeroEarth() {
         color="#9fc0ff"
       />
       <Stars
-        radius={80}
-        depth={60}
-        count={3000}
-        factor={3}
+        radius={120}
+        depth={80}
+        count={7000}
+        factor={5}
         saturation={0}
         fade
       />

@@ -8,6 +8,61 @@ const SUBTITLE =
   'Explore os astros do nosso sistema solar de forma interativa e educativa. Mergulhe em uma experiência visual que traz a grandiosidade do cosmos para suas mãos.';
 const STAR_SYMBOLS = ['✦', '✱', '✸'] as const;
 
+function CtaButton({
+  onClick,
+  href,
+  children,
+  large,
+}: {
+  onClick?: (e: React.MouseEvent<HTMLAnchorElement>) => void;
+  href: string;
+  children: React.ReactNode;
+  large?: boolean;
+}) {
+  return (
+    <a
+      href={href}
+      onClick={onClick}
+      style={{
+        display: 'inline-flex',
+        alignItems: 'center',
+        gap: large ? 10 : 8,
+        padding: large ? '13px 28px' : '11px 22px',
+        background: 'var(--color-accent)',
+        color: '#0c0b09',
+        fontFamily: 'var(--font-ui)',
+        fontSize: large ? 'clamp(13px,1.1vw,16px)' : 'clamp(12px,0.95vw,14px)',
+        fontWeight: 400,
+        letterSpacing: '0.13em',
+        textTransform: 'uppercase',
+        textDecoration: 'none',
+        borderRadius: '4px',
+        border: '1px solid var(--color-accent-warm)',
+        whiteSpace: 'nowrap',
+        cursor: 'pointer',
+        boxShadow: '0 1px 12px rgba(0,0,0,0.3)',
+        transition:
+          'filter .18s ease, box-shadow .18s ease, transform .18s ease',
+      }}
+      onMouseEnter={(e) => {
+        const el = e.currentTarget as HTMLAnchorElement;
+        el.style.filter = 'brightness(1.15)';
+        el.style.boxShadow =
+          '0 0 24px rgba(232,118,26,0.5), 0 0 6px rgba(244,163,64,0.6)';
+        el.style.transform = 'translateY(-2px)';
+      }}
+      onMouseLeave={(e) => {
+        const el = e.currentTarget as HTMLAnchorElement;
+        el.style.filter = '';
+        el.style.boxShadow = '0 1px 12px rgba(0,0,0,0.3)';
+        el.style.transform = '';
+      }}
+    >
+      {children}
+    </a>
+  );
+}
+
 export function Home() {
   const navigate = useNavigate();
 
@@ -15,75 +70,76 @@ export function Home() {
   const [typed1, setTyped1] = useState('');
   const [typed2, setTyped2] = useState('');
   const [caretLine, setCaretLine] = useState<1 | 2>(1);
-  const [caretOn, setCaretOn] = useState(true);
+  const [caretOn, setCaretOn] = useState(false);
   const [starIdx, setStarIdx] = useState(0);
+  const [buttonVisible, setButtonVisible] = useState(false);
 
-  // Curiosities carousel — data comes from the same planets.ts used by the engine
+  // Curiosities carousel
   const [displayIdx, setDisplayIdx] = useState(0);
   const [progress, setProgress] = useState(0);
   const [tipVisible, setTipVisible] = useState(true);
 
-  const mountedRef = useRef(true);
   const carIdxRef = useRef(0);
   const carStartRef = useRef(0);
   const fadeTimerRef = useRef<ReturnType<typeof setTimeout> | undefined>(
     undefined
   );
 
-  // Typing effect — caretLine initialises to 1 in state, no synchronous setState needed
+  // Typing effect — uses local `cancelled` flag to survive React StrictMode
   useEffect(() => {
+    let cancelled = false;
     let t: ReturnType<typeof setTimeout>;
     let i = 0;
     let j = 0;
 
     const typeH = () => {
-      if (!mountedRef.current) return;
+      if (cancelled) return;
+      i++;
       setTyped1(HEADLINE.slice(0, i));
       if (i < HEADLINE.length) {
-        i++;
-        t = setTimeout(typeH, 135);
+        t = setTimeout(typeH, 130);
       } else {
         t = setTimeout(() => {
-          if (!mountedRef.current) return;
+          if (cancelled) return;
           setCaretLine(2);
           const typeS = () => {
-            if (!mountedRef.current) return;
+            if (cancelled) return;
+            j++;
             setTyped2(SUBTITLE.slice(0, j));
             if (j < SUBTITLE.length) {
-              j++;
-              t = setTimeout(typeS, 22);
+              t = setTimeout(typeS, 18);
             } else {
               setCaretLine(1);
+              t = setTimeout(() => {
+                if (!cancelled) setButtonVisible(true);
+              }, 200);
             }
           };
           typeS();
-        }, 520);
+        }, 480);
       }
     };
 
-    typeH();
-    return () => clearTimeout(t);
+    t = setTimeout(typeH, 300);
+    return () => {
+      cancelled = true;
+      clearTimeout(t);
+    };
   }, []);
 
   // Caret blink
   useEffect(() => {
-    const id = setInterval(
-      () => mountedRef.current && setCaretOn((v) => !v),
-      530
-    );
+    const id = setInterval(() => setCaretOn((v) => !v), 530);
     return () => clearInterval(id);
   }, []);
 
   // Star symbol cycle
   useEffect(() => {
-    const id = setInterval(
-      () => mountedRef.current && setStarIdx((v) => (v + 1) % 3),
-      720
-    );
+    const id = setInterval(() => setStarIdx((v) => (v + 1) % 3), 800);
     return () => clearInterval(id);
   }, []);
 
-  // Tip transition — only uses refs and stable setState, no state deps needed
+  // Tip transition
   const goTip = useCallback((i: number) => {
     if (i === carIdxRef.current) {
       carStartRef.current = performance.now();
@@ -93,39 +149,40 @@ export function Home() {
     setTipVisible(false);
     clearTimeout(fadeTimerRef.current);
     fadeTimerRef.current = setTimeout(() => {
-      if (!mountedRef.current) return;
       carIdxRef.current = i;
       carStartRef.current = performance.now();
       setDisplayIdx(i);
       setProgress(0);
       setTipVisible(true);
-    }, 180);
+    }, 220);
   }, []);
 
-  // Carousel auto-advance — start time is set when the effect mounts (not during render)
+  // Carousel auto-advance — local `alive` flag survives StrictMode
   useEffect(() => {
+    let alive = true;
     carStartRef.current = performance.now();
     const id = setInterval(() => {
-      if (!mountedRef.current) return;
+      if (!alive) return;
       const p = Math.min(1, (performance.now() - carStartRef.current) / 8000);
       setProgress(p);
       if (p >= 1) goTip((carIdxRef.current + 1) % PLANETS.length);
     }, 60);
-    return () => clearInterval(id);
+    return () => {
+      alive = false;
+      clearInterval(id);
+    };
   }, [goTip]);
 
-  // Cleanup on unmount
   useEffect(
     () => () => {
-      mountedRef.current = false;
       clearTimeout(fadeTimerRef.current);
     },
     []
   );
 
   const planet = PLANETS[displayIdx];
-  const caret1On = caretLine === 1 && caretOn;
-  const caret2On = caretLine === 2 && caretOn;
+  const caret1On = caretLine === 1 && caretOn && typed1.length > 0;
+  const caret2On = caretLine === 2 && caretOn && typed2.length > 0;
 
   return (
     <div
@@ -145,7 +202,6 @@ export function Home() {
           overflow: 'hidden',
         }}
       >
-        {/* Real 3D Earth — reuses texture from planets.ts and R3F pipeline */}
         <HeroEarth />
 
         {/* Radial vignette */}
@@ -156,7 +212,7 @@ export function Home() {
             zIndex: 1,
             pointerEvents: 'none',
             background:
-              'radial-gradient(125% 95% at 50% 64%, rgba(12,11,9,0) 38%, rgba(12,11,9,0.5) 100%)',
+              'radial-gradient(125% 95% at 50% 64%, rgba(12,11,9,0) 38%, rgba(12,11,9,0.55) 100%)',
           }}
         />
         {/* Top/bottom fade */}
@@ -167,9 +223,25 @@ export function Home() {
             zIndex: 1,
             pointerEvents: 'none',
             background:
-              'linear-gradient(180deg, rgba(12,11,9,0.72) 0%, rgba(12,11,9,0) 26%, rgba(12,11,9,0) 64%, rgba(12,11,9,0.96) 100%)',
+              'linear-gradient(180deg, rgba(12,11,9,0.76) 0%, rgba(12,11,9,0) 22%, rgba(12,11,9,0) 60%, rgba(12,11,9,0.97) 100%)',
           }}
         />
+
+        {/* Project mark — top left */}
+        <div
+          style={{
+            position: 'absolute',
+            top: 'clamp(18px,3.2vh,28px)',
+            left: 'clamp(20px,3.2vw,36px)',
+            zIndex: 10,
+          }}
+        >
+          <img
+            src="/marksidereus.svg"
+            alt="Sidereus"
+            style={{ width: 32, height: 32, opacity: 0.9 }}
+          />
+        </div>
 
         {/* Hero copy */}
         <div
@@ -178,8 +250,8 @@ export function Home() {
             zIndex: 5,
             left: '50%',
             top: '50%',
-            transform: 'translate(-50%,-52%)',
-            width: 'min(760px,90vw)',
+            transform: 'translate(-50%,-54%)',
+            width: 'min(780px,90vw)',
             textAlign: 'center',
             pointerEvents: 'none',
           }}
@@ -188,25 +260,30 @@ export function Home() {
             style={{
               fontFamily: 'var(--font-display)',
               fontWeight: 700,
-              fontSize: 'clamp(54px,8vw,116px)',
+              fontSize: 'clamp(56px,8.5vw,120px)',
               letterSpacing: '-0.025em',
               color: 'var(--color-text-primary)',
               margin: 0,
-              lineHeight: 1.08,
+              lineHeight: 1.06,
               textShadow: '0 2px 48px rgba(0,0,0,0.9)',
+              minHeight: '1.06em',
             }}
           >
             {typed1}
             <span
               style={{
+                display: 'inline-block',
+                width: 3,
+                height: '0.82em',
+                marginLeft: 2,
+                marginBottom: '-0.06em',
+                verticalAlign: 'baseline',
+                background: 'var(--color-accent)',
                 opacity: caret1On ? 1 : 0,
-                color: 'var(--color-accent)',
-                marginLeft: 1,
-                transition: 'opacity .1s',
+                transition: 'opacity .08s',
+                borderRadius: 1,
               }}
-            >
-              ▍
-            </span>
+            />
           </h1>
 
           <p
@@ -214,80 +291,63 @@ export function Home() {
               fontFamily: 'var(--font-body)',
               fontWeight: 300,
               fontSize: 'clamp(14px,1.2vw,18px)',
-              lineHeight: 1.66,
+              lineHeight: 1.68,
               color: 'var(--color-text-secondary)',
-              margin: '20px auto 0',
-              maxWidth: 540,
-              minHeight: '3.3em',
+              margin: '18px auto 0',
+              maxWidth: 520,
+              minHeight: '3.36em',
               textShadow: '0 1px 16px rgba(0,0,0,0.6)',
             }}
           >
             {typed2}
             <span
               style={{
+                display: 'inline-block',
+                width: 2,
+                height: '0.82em',
+                marginLeft: 2,
+                marginBottom: '-0.06em',
+                verticalAlign: 'baseline',
+                background: 'var(--color-accent)',
                 opacity: caret2On ? 1 : 0,
-                color: 'var(--color-accent)',
-                marginLeft: 1,
-                transition: 'opacity .1s',
+                transition: 'opacity .08s',
+                borderRadius: 1,
               }}
-            >
-              ▍
-            </span>
+            />
           </p>
 
           <div
             style={{
-              marginTop: 'clamp(30px,4.4vh,46px)',
+              marginTop: 'clamp(28px,4vh,44px)',
               pointerEvents: 'auto',
               display: 'flex',
               justifyContent: 'center',
+              opacity: buttonVisible ? 1 : 0,
+              animation: buttonVisible
+                ? 'sid-fade-up 0.55s ease forwards'
+                : 'none',
             }}
           >
-            <a
+            <CtaButton
               href="/engine"
               onClick={(e) => {
                 e.preventDefault();
                 navigate('/engine');
               }}
-              style={{
-                background: 'var(--color-accent)',
-                color: '#0c0b09',
-                fontFamily: 'var(--font-ui)',
-                fontSize: 'clamp(16px,1.35vw,20px)',
-                letterSpacing: '0.1em',
-                textTransform: 'capitalize',
-                padding: '18px 44px',
-                borderRadius: '10px',
-                border: '1px solid var(--color-accent-warm)',
-                textDecoration: 'none',
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: 14,
-                whiteSpace: 'nowrap',
-                boxShadow: '0 2px 16px rgba(0,0,0,0.4)',
-                transition:
-                  'box-shadow .22s ease, filter .22s ease, transform .22s ease',
-                cursor: 'pointer',
-              }}
-              onMouseEnter={(e) => {
-                const el = e.currentTarget as HTMLAnchorElement;
-                el.style.filter = 'brightness(1.12)';
-                el.style.boxShadow =
-                  '0 0 32px rgba(232,118,26,0.55), 0 0 8px #f4a340';
-                el.style.transform = 'translateY(-2px)';
-              }}
-              onMouseLeave={(e) => {
-                const el = e.currentTarget as HTMLAnchorElement;
-                el.style.filter = '';
-                el.style.boxShadow = '0 2px 16px rgba(0,0,0,0.4)';
-                el.style.transform = '';
-              }}
+              large
             >
               Conheça os Astros
-              <span style={{ fontSize: '1.15em', lineHeight: 1 }}>
+              <span
+                style={{
+                  display: 'inline-block',
+                  fontSize: '1.1em',
+                  lineHeight: 1,
+                  animation: 'sid-star-spin 3.2s linear infinite',
+                }}
+              >
                 {STAR_SYMBOLS[starIdx]}
               </span>
-            </a>
+            </CtaButton>
           </div>
         </div>
 
@@ -296,28 +356,32 @@ export function Home() {
           style={{
             position: 'absolute',
             left: '50%',
-            bottom: 'clamp(20px,3.4vh,38px)',
+            bottom: 'clamp(20px,3.4vh,36px)',
             zIndex: 5,
             display: 'flex',
             flexDirection: 'column',
             alignItems: 'center',
-            gap: 9,
+            gap: 8,
             pointerEvents: 'none',
-            animation: 'sid-bob 2.4s ease-in-out infinite',
+            opacity: buttonVisible ? 1 : 0,
+            transition: 'opacity 0.6s ease 0.3s',
+            animation: buttonVisible
+              ? 'sid-bob 2.4s ease-in-out 0.9s infinite'
+              : 'none',
           }}
         >
           <span
             style={{
               fontFamily: 'var(--font-ui)',
-              fontSize: 'clamp(11px,0.85vw,13px)',
-              letterSpacing: '0.18em',
+              fontSize: 'clamp(10px,0.8vw,12px)',
+              letterSpacing: '0.2em',
               color: 'var(--color-text-muted)',
               textTransform: 'uppercase',
             }}
           >
             Role para explorar
           </span>
-          <span style={{ color: 'var(--color-text-muted)', fontSize: 15 }}>
+          <span style={{ color: 'var(--color-text-muted)', fontSize: 14 }}>
             ↓
           </span>
         </div>
@@ -356,8 +420,8 @@ export function Home() {
               <span
                 style={{
                   fontFamily: 'var(--font-ui)',
-                  fontSize: 'clamp(12px,0.95vw,14px)',
-                  letterSpacing: '0.16em',
+                  fontSize: 'clamp(11px,0.9vw,13px)',
+                  letterSpacing: '0.18em',
                   color: 'var(--color-accent)',
                   textTransform: 'uppercase',
                 }}
@@ -422,8 +486,8 @@ export function Home() {
             <span
               style={{
                 fontFamily: 'var(--font-ui)',
-                fontSize: 'clamp(12px,0.95vw,14px)',
-                letterSpacing: '0.16em',
+                fontSize: 'clamp(11px,0.9vw,13px)',
+                letterSpacing: '0.18em',
                 color: 'var(--color-accent)',
                 textTransform: 'uppercase',
               }}
@@ -435,7 +499,7 @@ export function Home() {
             style={{
               display: 'grid',
               gridTemplateColumns: 'repeat(auto-fit, minmax(238px, 1fr))',
-              gap: 'clamp(16px,2vw,24px)',
+              gap: 'clamp(14px,1.8vw,22px)',
               marginTop: 'clamp(34px,6vh,60px)',
             }}
           >
@@ -461,11 +525,11 @@ export function Home() {
                 style={{
                   background: 'var(--color-surface)',
                   border: '1px solid var(--color-border)',
-                  borderRadius: 8,
-                  padding: 'clamp(26px,3vw,38px)',
+                  borderRadius: 6,
+                  padding: 'clamp(24px,2.8vw,36px)',
                   display: 'flex',
                   flexDirection: 'column',
-                  gap: 14,
+                  gap: 12,
                   transition:
                     'border-color .2s ease, transform .2s ease, box-shadow .2s ease',
                 }}
@@ -473,7 +537,7 @@ export function Home() {
                   const el = e.currentTarget as HTMLDivElement;
                   el.style.borderColor = 'var(--color-accent-dim)';
                   el.style.transform = 'translateY(-3px)';
-                  el.style.boxShadow = '0 0 22px rgba(232,118,26,0.1)';
+                  el.style.boxShadow = '0 0 20px rgba(232,118,26,0.08)';
                 }}
                 onMouseLeave={(e) => {
                   const el = e.currentTarget as HTMLDivElement;
@@ -485,8 +549,8 @@ export function Home() {
                 <span
                   style={{
                     fontFamily: 'var(--font-ui)',
-                    fontSize: 'clamp(14px,1.1vw,17px)',
-                    letterSpacing: '0.12em',
+                    fontSize: 'clamp(12px,0.95vw,14px)',
+                    letterSpacing: '0.14em',
                     color: 'var(--color-accent)',
                   }}
                 >
@@ -496,7 +560,7 @@ export function Home() {
                   style={{
                     fontFamily: 'var(--font-display)',
                     fontWeight: 700,
-                    fontSize: 'clamp(18px,1.55vw,23px)',
+                    fontSize: 'clamp(17px,1.45vw,22px)',
                     color: 'var(--color-text-primary)',
                     margin: 0,
                   }}
@@ -551,8 +615,8 @@ export function Home() {
           <span
             style={{
               fontFamily: 'var(--font-ui)',
-              fontSize: 'clamp(12px,0.95vw,14px)',
-              letterSpacing: '0.16em',
+              fontSize: 'clamp(11px,0.9vw,13px)',
+              letterSpacing: '0.18em',
               color: 'var(--color-accent)',
               textTransform: 'uppercase',
             }}
@@ -589,47 +653,15 @@ export function Home() {
             justifyContent: 'center',
           }}
         >
-          <a
+          <CtaButton
             href="/engine"
             onClick={(e) => {
               e.preventDefault();
               navigate('/engine');
             }}
-            style={{
-              background: 'var(--color-accent)',
-              color: '#0c0b09',
-              fontFamily: 'var(--font-ui)',
-              fontSize: 'clamp(12px,1vw,14px)',
-              letterSpacing: '0.12em',
-              textTransform: 'capitalize',
-              padding: '18px 42px',
-              borderRadius: '10px',
-              border: '1px solid var(--color-accent-warm)',
-              textDecoration: 'none',
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: 12,
-              cursor: 'pointer',
-              transition:
-                'box-shadow .18s ease, filter .18s ease, transform .18s ease',
-              boxShadow: '0 2px 16px rgba(0,0,0,0.4)',
-            }}
-            onMouseEnter={(e) => {
-              const el = e.currentTarget as HTMLAnchorElement;
-              el.style.filter = 'brightness(1.12)';
-              el.style.boxShadow =
-                '0 0 28px rgba(232,118,26,0.5), 0 0 6px #f4a340';
-              el.style.transform = 'translateY(-1px)';
-            }}
-            onMouseLeave={(e) => {
-              const el = e.currentTarget as HTMLAnchorElement;
-              el.style.filter = '';
-              el.style.boxShadow = '0 2px 16px rgba(0,0,0,0.4)';
-              el.style.transform = '';
-            }}
           >
-            Conheça os Astros <span style={{ opacity: 0.85 }}>›</span>
-          </a>
+            Conheça os Astros <span style={{ opacity: 0.8 }}>›</span>
+          </CtaButton>
         </div>
       </section>
 
@@ -661,8 +693,8 @@ export function Home() {
               <span
                 style={{
                   fontFamily: 'var(--font-ui)',
-                  fontSize: 'clamp(12px,0.95vw,14px)',
-                  letterSpacing: '0.16em',
+                  fontSize: 'clamp(11px,0.9vw,13px)',
+                  letterSpacing: '0.18em',
                   color: 'var(--color-text-secondary)',
                   textTransform: 'uppercase',
                 }}
@@ -671,28 +703,30 @@ export function Home() {
               </span>
             </div>
 
-            <div style={{ marginTop: 'clamp(16px,2.6vh,24px)', minHeight: 96 }}>
+            <div
+              style={{ marginTop: 'clamp(18px,2.8vh,26px)', minHeight: 108 }}
+            >
               <div
                 style={{
                   opacity: tipVisible ? 1 : 0,
                   transform: tipVisible ? 'translateY(0)' : 'translateY(8px)',
-                  transition: 'opacity .35s ease, transform .35s ease',
+                  transition: 'opacity .32s ease, transform .32s ease',
                 }}
               >
                 <div
                   style={{
                     display: 'flex',
                     alignItems: 'center',
-                    gap: 14,
-                    marginBottom: 11,
+                    gap: 12,
+                    marginBottom: 12,
                     flexWrap: 'wrap',
                   }}
                 >
                   <span
                     style={{
                       fontFamily: 'var(--font-ui)',
-                      fontSize: 'clamp(16px,1.3vw,20px)',
-                      letterSpacing: '0.14em',
+                      fontSize: 'clamp(15px,1.25vw,19px)',
+                      letterSpacing: '0.16em',
                       color: 'var(--color-accent)',
                       textTransform: 'uppercase',
                     }}
@@ -701,14 +735,13 @@ export function Home() {
                   </span>
                   <span
                     style={{
-                      fontFamily: 'var(--font-ui)',
-                      fontSize: 'clamp(10px,0.8vw,12px)',
-                      letterSpacing: '0.12em',
+                      fontFamily: 'var(--font-body)',
+                      fontSize: 'clamp(10px,0.78vw,12px)',
+                      letterSpacing: '0.08em',
                       color: 'var(--color-text-secondary)',
-                      textTransform: 'capitalize',
                       border: '1px solid var(--color-border)',
-                      borderRadius: 6,
-                      padding: '4px 10px',
+                      borderRadius: 4,
+                      padding: '3px 9px',
                     }}
                   >
                     {planet.type}
@@ -719,7 +752,7 @@ export function Home() {
                     fontFamily: 'var(--font-body)',
                     fontWeight: 300,
                     fontSize: 'clamp(14px,1.15vw,17px)',
-                    lineHeight: 1.62,
+                    lineHeight: 1.65,
                     color: 'var(--color-text-secondary)',
                     margin: 0,
                     maxWidth: 860,
@@ -740,7 +773,7 @@ export function Home() {
                 marginTop: 'clamp(16px,2.4vh,22px)',
               }}
             >
-              <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
                 {PLANETS.map((p, i) => {
                   const active = i === displayIdx;
                   return (
@@ -750,7 +783,7 @@ export function Home() {
                       aria-label={`Ver ${p.name}`}
                       style={{
                         position: 'relative',
-                        width: active ? 30 : 14,
+                        width: active ? 28 : 12,
                         height: 3,
                         borderRadius: 4,
                         border: 'none',
@@ -760,7 +793,7 @@ export function Home() {
                         background: active
                           ? 'var(--color-accent-dim)'
                           : 'var(--color-border)',
-                        transition: 'width .3s ease, background .3s ease',
+                        transition: 'width .28s ease, background .28s ease',
                         flexShrink: 0,
                       }}
                     >
@@ -773,7 +806,7 @@ export function Home() {
                             background: 'var(--color-accent)',
                             borderRadius: 4,
                             width: `${progress * 100}%`,
-                            transition: 'width .12s linear',
+                            transition: 'width .1s linear',
                           }}
                         />
                       )}
@@ -786,13 +819,13 @@ export function Home() {
                 onClick={() => goTip((carIdxRef.current + 1) % PLANETS.length)}
                 style={{
                   fontFamily: 'var(--font-ui)',
-                  fontSize: 'clamp(12px,0.95vw,14px)',
-                  letterSpacing: '0.14em',
+                  fontSize: 'clamp(11px,0.9vw,13px)',
+                  letterSpacing: '0.16em',
                   color: 'var(--color-accent)',
-                  textTransform: 'capitalize',
+                  textTransform: 'uppercase',
                   display: 'inline-flex',
                   alignItems: 'center',
-                  gap: 9,
+                  gap: 8,
                   whiteSpace: 'nowrap',
                   cursor: 'pointer',
                   background: 'none',
@@ -803,12 +836,12 @@ export function Home() {
                 onMouseEnter={(e) => {
                   const el = e.currentTarget as HTMLButtonElement;
                   el.style.color = 'var(--color-accent-warm)';
-                  el.style.gap = '13px';
+                  el.style.gap = '12px';
                 }}
                 onMouseLeave={(e) => {
                   const el = e.currentTarget as HTMLButtonElement;
                   el.style.color = 'var(--color-accent)';
-                  el.style.gap = '9px';
+                  el.style.gap = '8px';
                 }}
               >
                 Próxima dica <span>→</span>
@@ -820,7 +853,7 @@ export function Home() {
         <div
           style={{
             borderTop: '1px solid var(--color-border)',
-            padding: 'clamp(18px,3vh,26px) clamp(24px,6vw,80px)',
+            padding: 'clamp(16px,2.8vh,24px) clamp(24px,6vw,80px)',
           }}
         >
           <div
@@ -838,9 +871,9 @@ export function Home() {
               style={{
                 fontFamily: 'var(--font-display)',
                 fontWeight: 700,
-                fontSize: 'clamp(16px,1.4vw,19px)',
+                fontSize: 'clamp(15px,1.3vw,18px)',
                 color: 'var(--color-text-primary)',
-                letterSpacing: '0.005em',
+                letterSpacing: '0.01em',
               }}
             >
               Sidereus
@@ -848,10 +881,10 @@ export function Home() {
             <span
               style={{
                 fontFamily: 'var(--font-ui)',
-                fontSize: 'clamp(10px,0.8vw,12px)',
+                fontSize: 'clamp(10px,0.78vw,12px)',
                 letterSpacing: '0.16em',
                 color: 'var(--color-text-muted)',
-                textTransform: 'capitalize',
+                textTransform: 'uppercase',
               }}
             >
               Sistema Solar Interativo · Protótipo
