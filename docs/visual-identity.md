@@ -12,10 +12,10 @@
 
 **Espacial gamificado** — a estética do Sidereus parte do espaço como cenário e abraça a linguagem visual de jogos retro: pixel fonts, animações de interação expressivas, feedback visual imediato. Não é um dashboard científico frio, nem um site infantil de astronomia. É a sensação de explorar o cosmos em um jogo — preciso nos dados, expressivo na interação.
 
-A interface tem duas camadas de linguagem visual que coexistem:
-- **Interface / HUD** — títulos, labels, CTAs: Dogica (pixel), o marcador visual mais forte da identidade gamificada
-- **Leitura / dados contextuais** — descrições e valores numéricos: lenia-mono-demo (serifada mono, legível em blocos)
-- **Labels e metadados** — unidades, rótulos de campo, HUD técnico: Xanmono (geométrica, marcante)
+A interface tem três camadas de linguagem visual que coexistem:
+- **Logo / Títulos principais** — Xanmono (geométrica rígida): ancora a identidade visual, usada no nome do produto e nos títulos de seção de maior hierarquia
+- **UI gamificada / HUD curto** — Dogica (pixel): labels, badges, texto de CTA, nomes de planetas no HUD — elementos de até ~4 palavras que carregam o tom retro
+- **Leitura / Corpo** — lenia-mono-demo (mono serifada): descrições, painéis de informação, qualquer bloco de texto com mais de uma linha
 
 ### Animações de interação (obrigatórias)
 
@@ -76,46 +76,49 @@ A interface tem duas camadas de linguagem visual que coexistem:
 
 ### 3.1 Famílias
 
-| Papel               | Fonte             | Fallback              | Uso                                                     |
-| ------------------- | ----------------- | --------------------- | ------------------------------------------------------- |
-| **Display / UI**    | `Dogica`          | `'Press Start 2P'`    | Nome do produto, títulos de seção, texto do CTA         |
-| **Leitura / Corpo** | `lenia-mono-demo` | `'Courier Prime'`     | Descrições de planetas, textos corridos, painéis de info|
-| **Labels / Dados**  | `Xanmono`         | `'IBM Plex Mono'`     | Valores numéricos, unidades, labels de HUD, metadados   |
+| Papel                  | Fonte             | Fallback              | Uso                                                      |
+| ---------------------- | ----------------- | --------------------- | -------------------------------------------------------- |
+| **Logo / Títulos**     | `Xanmono`         | `'IBM Plex Mono'`     | Nome do produto, títulos de maior hierarquia, seções     |
+| **UI / HUD / CTA**     | `Dogica`          | `'Press Start 2P'`    | Nomes de planetas no HUD, labels curtos, texto de botão  |
+| **Leitura / Corpo**    | `lenia-mono-demo` | `'Courier Prime'`     | Descrições de planetas, textos corridos, painéis de info |
 
-> **Dogica** é a fonte que define o tom gamificado — usar somente em textos curtos (títulos, botões, labels de até ~4 palavras). Em parágrafos, fica ilegível.
+> **Xanmono** ancora a identidade visual — rígida e geométrica, define o caráter da marca. Funciona bem em `--text-display` e `--text-title`.
 >
-> **lenia-mono-demo** tem serifas dentro de grade mono — mantém o ritmo técnico mas com conforto de leitura. Ideal para blocos de descrição.
+> **Dogica** é a fonte gamificada — pixel, imediata, reconhecível. Reservar para elementos de UI curtos (máx ~4 palavras). Em tamanhos abaixo de 0.75rem perde legibilidade.
 >
-> **Xanmono** é geométrica e marcante — funciona bem em tamanhos menores para dados estruturados e HUD.
+> **lenia-mono-demo** tem serifas dentro de grade mono — mantém o ritmo técnico com conforto de leitura em blocos. É a única das três adequada para parágrafos.
 
 ### 3.2 Escala de tamanhos
 
 | Token             | Tamanho   | Peso | Família           | Uso                                             |
 | ----------------- | --------- | ---- | ----------------- | ----------------------------------------------- |
-| `--text-display`  | 2.5rem    | 700  | Dogica            | Nome do produto na tela inicial                 |
-| `--text-title`    | 1.25rem   | 700  | Dogica            | Título do painel de planeta, seções da HUD      |
-| `--text-subtitle` | 0.9375rem | 400  | lenia-mono-demo   | Subtítulos de seção, tipo de planeta            |
+| `--text-display`  | 2.5rem    | 700  | Xanmono           | Nome do produto na tela inicial (logo)          |
+| `--text-title`    | 1.25rem   | 700  | Xanmono           | Títulos de seção de maior hierarquia            |
+| `--text-subtitle` | 0.9375rem | 600  | Dogica            | Nome do planeta no HUD, subtítulos de painel    |
 | `--text-body`     | 0.875rem  | 400  | lenia-mono-demo   | Descrições, textos de leitura no painel         |
-| `--text-data`     | 0.875rem  | 400  | Xanmono           | Valores numéricos (distância, período orbital)  |
-| `--text-label`    | 0.6875rem | 400  | Xanmono           | Labels de HUD, rótulos de campo                 |
-| `--text-micro`    | 0.625rem  | 300  | Xanmono           | Unidades de medida, metadados                   |
+| `--text-data`     | 0.875rem  | 400  | lenia-mono-demo   | Valores numéricos com contexto (ex: "687 dias") |
+| `--text-label`    | 0.6875rem | 400  | Dogica            | Labels de HUD, rótulos de campo curtos          |
+| `--text-micro`    | 0.625rem  | 300  | lenia-mono-demo   | Unidades de medida, metadados                   |
 
-> Dogica tem kerning generoso — em `--text-display`, aplicar `letter-spacing: 0.05em` para respirar. Em tamanhos menores que 0.75rem ela perde legibilidade — descer para Xanmono nesses casos.
+> Xanmono em `--text-display`: aplicar `letter-spacing: 0.04em` para respirar na escala grande.  
+> Dogica abaixo de 0.625rem perde legibilidade — não usar em `--text-micro`.
 
 ### 3.3 Hierarquia de exemplo (painel de planeta)
 
 ```
-MARTE                              ← text-title, Dogica, accent
-Planeta Rochoso                    ← text-subtitle, lenia-mono-demo, text-secondary
+SISTEMA SOLAR                      ← text-display, Xanmono, text-primary  (logo/hero)
 
-Distância ao Sol                   ← text-label, Xanmono, text-muted
-227,9 milhões km                   ← text-data, Xanmono, text-primary
+MARTE                              ← text-subtitle, Dogica, accent         (nome no HUD)
+Planeta Rochoso                    ← text-body, lenia-mono-demo, text-secondary
 
-Sobre Marte                        ← text-subtitle, lenia-mono-demo, text-secondary
+Distância ao Sol                   ← text-label, Dogica, text-muted
+227,9 milhões km                   ← text-data, lenia-mono-demo, text-primary
+
+Sobre Marte                        ← text-label, Dogica, text-muted
 "Marte é o quarto planeta..."      ← text-body, lenia-mono-demo, text-primary
 
-Período Orbital                    ← text-label, Xanmono, text-muted
-687 dias terrestres                ← text-data, Xanmono, text-primary
+Período Orbital                    ← text-label, Dogica, text-muted
+687 dias terrestres                ← text-data, lenia-mono-demo, text-primary
 ```
 
 ---
@@ -248,9 +251,9 @@ Aplicado via `@react-three/postprocessing` dentro do `<Canvas>` do `/engine`:
   --color-error: #c04a3f;
 
   /* Tipografia */
-  --font-display: 'Dogica', 'Press Start 2P', monospace;
-  --font-body: 'lenia-mono-demo', 'Courier Prime', monospace;
-  --font-data: 'Xanmono', 'IBM Plex Mono', monospace;
+  --font-display: 'Xanmono', 'IBM Plex Mono', monospace;   /* logo, títulos */
+  --font-ui: 'Dogica', 'Press Start 2P', monospace;         /* HUD, labels, CTAs */
+  --font-body: 'lenia-mono-demo', 'Courier Prime', monospace; /* corpo, dados */
 
   /* Escala */
   --text-display: 2.5rem;
@@ -284,7 +287,8 @@ Aplicado via `@react-three/postprocessing` dentro do `<Canvas>` do `/engine`:
 - **Azul como tom de fundo** — os neutros quentes são intencionais e não negociáveis.
 - **Roxo/violeta** — fora da identidade.
 - **Branco puro (`#FFFFFF`)** — usar `--color-text-primary` (`#EDE9E3`).
-- **Dogica em textos longos** — pixel font em parágrafos é ilegível. Máximo de ~6 palavras por instância.
+- **Dogica em textos longos** — pixel font em parágrafos é ilegível. Máximo de ~4 palavras por instância.
+- **Xanmono em corpo de texto** — a geometria rígida cansa em leitura corrida. Reservar para títulos e hierarquias altas.
 - **Gradientes horizontais coloridos como decoração** — se usar gradiente, radial e sutil, centrado no accent.
 - **Border radius maior que 6px** — cantos retos são parte da estética pixel.
 - **Scanlines ou ChromaticAberration em intensidade alta** — o efeito deve ser subliminar, não o ponto focal.
