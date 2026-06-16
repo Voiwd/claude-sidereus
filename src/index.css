@@ -1,1 +1,63 @@
 @import 'tailwindcss';
+
+:root {
+  /* Background — neutros quentes escuros */
+  --color-bg: #0c0b09;
+  --color-surface: #141210;
+  --color-surface-2: #1c1a17;
+  --color-border: #2a2620;
+
+  /* Texto */
+  --color-text-primary: #ede9e3;
+  --color-text-secondary: #8a8176;
+  --color-text-muted: #4a4540;
+
+  /* Accent âmbar */
+  --color-accent: #e8761a;
+  --color-accent-warm: #f4a340;
+  --color-accent-dim: #6b3510;
+  --color-accent-glow: rgba(232, 118, 26, 0.18);
+
+  /* Semântico */
+  --color-success: #3dab7b;
+  --color-warning: #d4882a;
+  --color-error: #c04a3f;
+
+  /* Tipografia — três famílias com papéis distintos */
+  --font-display: 'Courier Prime', monospace;
+  --font-serif: 'Source Serif 4', Georgia, serif;
+  --font-data: 'IBM Plex Mono', monospace;
+
+  /* Escala tipográfica */
+  --text-display: 2.5rem;
+  --text-title: 1.375rem;
+  --text-subtitle: 1rem;
+  --text-body: 0.9375rem;
+  --text-data: 0.875rem;
+  --text-label: 0.6875rem;
+  --text-micro: 0.625rem;
+
+  /* Espaçamento (base 4px) */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --space-12: 48px;
+
+  /* Raios */
+  --radius-sm: 2px;
+  --radius-md: 3px;
+  --radius-lg: 6px;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+  margin: 0;
+  background-color: var(--color-bg);
+  color: var(--color-text-primary);
+  font-family: var(--font-display);
+}
