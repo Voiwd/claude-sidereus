@@ -1,5 +1,5 @@
 import { useLoader } from '@react-three/fiber';
-import { TextureLoader } from 'three';
+import { DoubleSide, TextureLoader } from 'three';
 import { PlanetBillboard } from './PlanetBillboard';
 import type { PlanetData } from '../data/planets';
 
@@ -41,9 +41,10 @@ export function Planet({ data, isFocused, onSelect }: PlanetProps) {
       </mesh>
 
       {ringTexture && (
-        <mesh>
-          <cylinderGeometry args={[radius * 2, 0]} />
-          <meshStandardMaterial map={ring} />
+        // Ring lies in the XZ plane; ringGeometry is in XY by default so rotate -90°
+        <mesh rotation={[-Math.PI / 2, 0, 0]}>
+          <ringGeometry args={[radius * 1.25, radius * 2.5, 64]} />
+          <meshStandardMaterial map={ring} side={DoubleSide} transparent />
         </mesh>
       )}
 
