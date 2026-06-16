@@ -60,7 +60,7 @@ export function PlanetPanel() {
           </h2>
           <p
             style={{
-              fontFamily: 'var(--font-serif)',
+              fontFamily: 'var(--font-body)',
               fontSize: 'var(--text-subtitle)',
               color: 'var(--color-text-secondary)',
               margin: '4px 0 0',
@@ -123,7 +123,7 @@ export function PlanetPanel() {
           <div>
             <p
               style={{
-                fontFamily: 'var(--font-data)',
+                fontFamily: 'var(--font-ui)',
                 fontSize: 'var(--text-label)',
                 color: 'var(--color-text-muted)',
                 margin: '0 0 2px',
@@ -135,7 +135,7 @@ export function PlanetPanel() {
             </p>
             <p
               style={{
-                fontFamily: 'var(--font-data)',
+                fontFamily: 'var(--font-body)',
                 fontSize: 'var(--text-data)',
                 color: 'var(--color-text-primary)',
                 margin: 0,
@@ -148,7 +148,7 @@ export function PlanetPanel() {
         <div>
           <p
             style={{
-              fontFamily: 'var(--font-data)',
+              fontFamily: 'var(--font-ui)',
               fontSize: 'var(--text-label)',
               color: 'var(--color-text-muted)',
               margin: '0 0 2px',
@@ -160,7 +160,7 @@ export function PlanetPanel() {
           </p>
           <p
             style={{
-              fontFamily: 'var(--font-data)',
+              fontFamily: 'var(--font-body)',
               fontSize: 'var(--text-data)',
               color: 'var(--color-text-primary)',
               margin: 0,
@@ -183,7 +183,7 @@ export function PlanetPanel() {
       {/* Description */}
       <p
         style={{
-          fontFamily: 'var(--font-serif)',
+          fontFamily: 'var(--font-body)',
           fontSize: 'var(--text-body)',
           color: 'var(--color-text-primary)',
           lineHeight: 1.6,

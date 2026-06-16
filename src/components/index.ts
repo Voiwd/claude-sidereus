@@ -1,3 +1,4 @@
+export { HeroEarth } from './HeroEarth';
 export { Planet } from './Planet';
 export { PlanetBillboard } from './PlanetBillboard';
 export { PlanetPanel } from './PlanetPanel';
