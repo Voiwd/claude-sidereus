@@ -50,3 +50,28 @@ The full visual identity is in `docs/visual-identity.md`. Key rules:
 - **Avoid:** pure white (`#FFFFFF`), purple/violet, serif for numbers, mono for paragraphs, blue backgrounds
 
 CSS custom properties for all tokens are defined in `docs/visual-identity.md` §6 and should be used rather than hard-coding hex values.
+
+## Verification Protocol
+
+**Never claim a visual change is complete without verifying it renders correctly in a browser.**
+
+Use headless Chromium (available via Playwright at `/opt/pw-browsers/`) to screenshot and inspect the result before reporting success:
+
+```js
+// /tmp/pup must have playwright installed: npm install playwright --prefix /tmp/pup
+const { chromium } = require('/tmp/pup/node_modules/playwright');
+chromium.launch({
+  executablePath: '/opt/pw-browsers/chromium_headless_shell-1194/chrome-linux/headless_shell',
+  args: ['--no-sandbox', '--disable-setuid-sandbox'],
+}).then(async (b) => {
+  const p = await b.newPage();
+  await p.setViewportSize({ width: 1440, height: 900 });
+  await p.goto('http://localhost:5173/', { waitUntil: 'domcontentloaded', timeout: 30000 });
+  await new Promise((r) => setTimeout(r, 5000));
+  await p.screenshot({ path: '/tmp/screenshot.png' });
+  // Inspect fonts, computed styles, etc. before closing
+  await b.close();
+});
+```
+
+Always send the screenshot to the user with `SendUserFile` and confirm the computed styles match expectations before marking any UI task done.
