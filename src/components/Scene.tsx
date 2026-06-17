@@ -7,6 +7,9 @@ import { useFrame, useThree } from '@react-three/fiber';
 import { Vector3 } from 'three';
 import type { OrbitControls as OrbitControlsImpl } from 'three-stdlib';
 
+const CAMERA_LERP = 0.12;
+const CAMERA_EASE = 0.08;
+
 export function Scene() {
   const controlsRef = useRef<OrbitControlsImpl | null>(null);
   const { camera } = useThree();
@@ -17,20 +20,18 @@ export function Scene() {
   } | null>(null);
 
   useFrame(() => {
-    if (!target || !controlsRef.current?.target) {
-      return;
-    }
+    if (!target || !controlsRef.current?.target) return;
 
-    const controlsTarget = controlsRef.current.target as Vector3;
+    const controlsTarget = controlsRef.current.target;
     const previousTarget = controlsTarget.clone();
-    controlsTarget.lerp(target.lookAt, 0.12);
+    controlsTarget.lerp(target.lookAt, CAMERA_LERP);
 
     const targetDelta = controlsTarget.clone().sub(previousTarget);
     camera.position.add(targetDelta);
 
     const offset = camera.position.clone().sub(controlsTarget);
     const nextDistance =
-      offset.length() + (target.distance - offset.length()) * 0.08;
+      offset.length() + (target.distance - offset.length()) * CAMERA_EASE;
     camera.position.copy(controlsTarget).add(offset.setLength(nextDistance));
     controlsRef.current.update();
 
