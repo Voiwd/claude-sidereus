@@ -48,7 +48,7 @@ export function PlanetBillboard({
   }
 
   return (
-    <Html center position={[0, 0, 0]} zIndexRange={[20, 0]}>
+    <Html center position={[0, 0, 0]} zIndexRange={[0, 20]}>
       <button
         aria-label={`Focar em ${label}`}
         onPointerDown={handlePointerDown}
