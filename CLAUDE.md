@@ -2,6 +2,12 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+## Repository
+
+This is the fork **Voiwd/claude-sidereus** — not the upstream `Sidereus-Team/Sidereus`.
+
+Always scope `gh` commands explicitly: `gh pr list --repo Voiwd/claude-sidereus`. Without `--repo`, `gh` may resolve to the upstream and return PRs/issues that belong to the original project (numbers above ~6 are upstream).
+
 ## Commands
 
 ```bash
