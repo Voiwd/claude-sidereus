@@ -792,7 +792,7 @@ export function Home() {
                   goTip((carIndex + 1) % ASTROS.length);
                 }}
                 style={{
-                  fontFamily: 'var(--font-ui)',
+                  fontFamily: 'var(--font-body)',
                   fontSize: 'clamp(12px,0.95vw,14px)',
                   letterSpacing: '0.14em',
                   color: 'var(--color-accent)',
@@ -879,7 +879,7 @@ function HeroCta({
       style={{
         background: 'var(--color-accent)',
         color: 'var(--color-bg)',
-        fontFamily: 'var(--font-ui)',
+        fontFamily: 'var(--font-body)',
         fontSize: 'clamp(16px,1.35vw,20px)',
         letterSpacing: '0.1em',
         textTransform: 'capitalize',
@@ -931,7 +931,7 @@ function FinalCta({ onClick }: { onClick: (e: React.MouseEvent) => void }) {
       style={{
         background: 'var(--color-accent)',
         color: 'var(--color-bg)',
-        fontFamily: 'var(--font-ui)',
+        fontFamily: 'var(--font-body)',
         fontSize: 'clamp(12px,1vw,14px)',
         letterSpacing: '0.12em',
         textTransform: 'capitalize',
