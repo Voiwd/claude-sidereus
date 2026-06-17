@@ -1,6 +1,6 @@
 import { Canvas } from '@react-three/fiber';
 import { useNavigate } from 'react-router-dom';
-import { PlanetPanel, Scene } from '../../components';
+import { PlanetPanel, Scene, TimeControls } from '../../components';
 
 export function Engine() {
   const navigate = useNavigate();
@@ -44,6 +44,7 @@ export function Engine() {
       </button>
 
       <PlanetPanel />
+      <TimeControls />
 
       <Canvas camera={{ position: [0, 5, 12], fov: 60 }}>
         <Scene />
