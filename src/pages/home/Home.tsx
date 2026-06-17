@@ -343,7 +343,12 @@ export function Home() {
     const timer = setInterval(() => {
       const p = Math.min(1, (performance.now() - carStart.current) / dur);
       setProgress(p);
-      if (p >= 1) goTip((carIndexRef.current + 1) % ASTROS.length);
+      if (p >= 1) {
+        // Reset carStart immediately so subsequent ticks see p≈0 and don't
+        // keep cancelling the fade-out setTimeout before it can fire.
+        carStart.current = performance.now();
+        goTip((carIndexRef.current + 1) % ASTROS.length);
+      }
     }, 60);
     return () => {
       clearInterval(timer);
@@ -653,7 +658,7 @@ export function Home() {
             justifyContent: 'center',
           }}
         >
-          <FinalCta onClick={onCta} />
+          <FinalCta starSymbol={STAR_SYMBOLS[starIdx]} onClick={onCta} />
         </div>
       </section>
 
@@ -909,12 +914,20 @@ function HeroCta({
       }}
     >
       {CTA_LABEL}
-      <span style={{ fontSize: '1.15em', lineHeight: 1 }}>{starSymbol}</span>
+      {hover && (
+        <span style={{ fontSize: '1.15em', lineHeight: 1 }}>{starSymbol}</span>
+      )}
     </a>
   );
 }
 
-function FinalCta({ onClick }: { onClick: (e: React.MouseEvent) => void }) {
+function FinalCta({
+  starSymbol,
+  onClick,
+}: {
+  starSymbol: string;
+  onClick: (e: React.MouseEvent) => void;
+}) {
   const [hover, setHover] = useState(false);
   const [active, setActive] = useState(false);
   return (
@@ -960,7 +973,11 @@ function FinalCta({ onClick }: { onClick: (e: React.MouseEvent) => void }) {
       }}
     >
       {CTA_LABEL}
-      <span style={{ opacity: 0.85 }}>›</span>
+      {hover ? (
+        <span style={{ fontSize: '1.15em', lineHeight: 1 }}>{starSymbol}</span>
+      ) : (
+        <span style={{ opacity: 0.85 }}>›</span>
+      )}
     </a>
   );
 }
