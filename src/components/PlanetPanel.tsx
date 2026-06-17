@@ -1,10 +1,11 @@
-import { useEffect } from 'react';
-import { getPlanetById } from '../data/planets';
+import { useEffect, useState } from 'react';
+import { getBodyById, formatPeriod } from '../data/bodies';
 import { useStore } from '../store/useStore';
 
 export function PlanetPanel() {
   const { focusedPlanetId, setFocusedPlanetId } = useStore();
-  const planet = focusedPlanetId ? getPlanetById(focusedPlanetId) : null;
+  const planet = focusedPlanetId ? getBodyById(focusedPlanetId) : null;
+  const [scienceOpen, setScienceOpen] = useState(false);
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
@@ -69,6 +70,20 @@ export function PlanetPanel() {
           >
             {planet.type}
           </p>
+          {planet.kind === 'star' && (
+            <p
+              style={{
+                fontFamily: 'var(--font-display)',
+                fontSize: 'var(--text-micro)',
+                color: 'var(--color-accent-dim)',
+                margin: '6px 0 0',
+                textTransform: 'uppercase',
+                letterSpacing: '0.08em',
+              }}
+            >
+              Solução do Sistema Solar
+            </p>
+          )}
         </div>
         <button
           onClick={() => setFocusedPlanetId(null)}
@@ -111,7 +126,7 @@ export function PlanetPanel() {
         }}
       />
 
-      {/* Data grid */}
+      {/* Curated data grid: 2 cols x 3 rows */}
       <div
         style={{
           display: 'grid',
@@ -119,32 +134,35 @@ export function PlanetPanel() {
           gap: 'var(--space-3)',
         }}
       >
-        {planet.distanceAU > 0 && (
-          <div>
-            <p
-              style={{
-                fontFamily: 'var(--font-data)',
-                fontSize: 'var(--text-label)',
-                color: 'var(--color-text-muted)',
-                margin: '0 0 2px',
-                textTransform: 'uppercase',
-                letterSpacing: '0.05em',
-              }}
-            >
-              Dist. ao Sol
-            </p>
-            <p
-              style={{
-                fontFamily: 'var(--font-data)',
-                fontSize: 'var(--text-data)',
-                color: 'var(--color-text-primary)',
-                margin: 0,
-              }}
-            >
-              {planet.distanceAU} UA
-            </p>
-          </div>
-        )}
+        {/* Row 1: Distance to Sol, Orbital Period */}
+        <div>
+          <p
+            style={{
+              fontFamily: 'var(--font-data)',
+              fontSize: 'var(--text-label)',
+              color: 'var(--color-text-muted)',
+              margin: '0 0 2px',
+              textTransform: 'uppercase',
+              letterSpacing: '0.05em',
+            }}
+          >
+            Dist. ao Sol
+          </p>
+          <p
+            style={{
+              fontFamily: 'var(--font-data)',
+              fontSize: 'var(--text-data)',
+              color: 'var(--color-text-primary)',
+              margin: 0,
+            }}
+          >
+            {planet.kind === 'star'
+              ? '— UA'
+              : planet.semiMajorAxisAU
+                ? `${planet.semiMajorAxisAU.toFixed(3)} UA`
+                : '—'}
+          </p>
+        </div>
         <div>
           <p
             style={{
@@ -166,9 +184,342 @@ export function PlanetPanel() {
               margin: 0,
             }}
           >
-            {planet.orbitalPeriod}
+            {formatPeriod(planet.orbitalPeriodDays)}
           </p>
         </div>
+
+        {/* Row 2: Gravity, Mean Temperature */}
+        <div>
+          <p
+            style={{
+              fontFamily: 'var(--font-data)',
+              fontSize: 'var(--text-label)',
+              color: 'var(--color-text-muted)',
+              margin: '0 0 2px',
+              textTransform: 'uppercase',
+              letterSpacing: '0.05em',
+            }}
+          >
+            Gravidade
+          </p>
+          <p
+            style={{
+              fontFamily: 'var(--font-data)',
+              fontSize: 'var(--text-data)',
+              color: 'var(--color-text-primary)',
+              margin: 0,
+            }}
+          >
+            {planet.gravityMs2.toFixed(2)} m/s²
+          </p>
+        </div>
+        <div>
+          <p
+            style={{
+              fontFamily: 'var(--font-data)',
+              fontSize: 'var(--text-label)',
+              color: 'var(--color-text-muted)',
+              margin: '0 0 2px',
+              textTransform: 'uppercase',
+              letterSpacing: '0.05em',
+            }}
+          >
+            Temperatura Média
+          </p>
+          <p
+            style={{
+              fontFamily: 'var(--font-data)',
+              fontSize: 'var(--text-data)',
+              color: 'var(--color-text-primary)',
+              margin: 0,
+            }}
+          >
+            {planet.meanTempC}°C
+          </p>
+        </div>
+
+        {/* Row 3: Day Duration, Moon Count */}
+        <div>
+          <p
+            style={{
+              fontFamily: 'var(--font-data)',
+              fontSize: 'var(--text-label)',
+              color: 'var(--color-text-muted)',
+              margin: '0 0 2px',
+              textTransform: 'uppercase',
+              letterSpacing: '0.05em',
+            }}
+          >
+            Duração do Dia
+          </p>
+          <p
+            style={{
+              fontFamily: 'var(--font-data)',
+              fontSize: 'var(--text-data)',
+              color: 'var(--color-text-primary)',
+              margin: 0,
+            }}
+          >
+            {formatPeriod(Math.abs(planet.rotationPeriodHours) / 24)}
+          </p>
+        </div>
+        {planet.kind !== 'moon' && (
+          <div>
+            <p
+              style={{
+                fontFamily: 'var(--font-data)',
+                fontSize: 'var(--text-label)',
+                color: 'var(--color-text-muted)',
+                margin: '0 0 2px',
+                textTransform: 'uppercase',
+                letterSpacing: '0.05em',
+              }}
+            >
+              Luas
+            </p>
+            <p
+              style={{
+                fontFamily: 'var(--font-data)',
+                fontSize: 'var(--text-data)',
+                color: 'var(--color-text-primary)',
+                margin: 0,
+              }}
+            >
+              {planet.moonCount}
+            </p>
+          </div>
+        )}
+      </div>
+
+      {/* Divider */}
+      <hr
+        style={{
+          border: 'none',
+          borderTop: '1px solid var(--color-border)',
+          margin: 0,
+        }}
+      />
+
+      {/* Collapsible Science Section */}
+      <div>
+        <button
+          onClick={() => setScienceOpen(!scienceOpen)}
+          style={{
+            background: 'none',
+            border: 'none',
+            fontFamily: 'var(--font-display)',
+            fontSize: 'var(--text-label)',
+            color: 'var(--color-text-muted)',
+            cursor: 'pointer',
+            padding: 0,
+            textAlign: 'left',
+            width: '100%',
+            textTransform: 'uppercase',
+            letterSpacing: '0.05em',
+            transition: 'color 150ms',
+          }}
+          onMouseEnter={(e) => {
+            const btn = e.currentTarget as HTMLButtonElement;
+            btn.style.color = 'var(--color-accent-dim)';
+          }}
+          onMouseLeave={(e) => {
+            const btn = e.currentTarget as HTMLButtonElement;
+            btn.style.color = 'var(--color-text-muted)';
+          }}
+        >
+          Dados Científicos {scienceOpen ? '▾' : '▸'}
+        </button>
+
+        {scienceOpen && (
+          <div
+            style={{
+              display: 'grid',
+              gridTemplateColumns: '1fr 1fr',
+              gap: 'var(--space-2)',
+              marginTop: 'var(--space-2)',
+              paddingTop: 'var(--space-2)',
+              borderTop: '1px solid var(--color-border)',
+            }}
+          >
+            <div>
+              <p
+                style={{
+                  fontFamily: 'var(--font-data)',
+                  fontSize: 'var(--text-micro)',
+                  color: 'var(--color-text-muted)',
+                  margin: 0,
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.05em',
+                }}
+              >
+                Raio
+              </p>
+              <p
+                style={{
+                  fontFamily: 'var(--font-data)',
+                  fontSize: 'var(--text-micro)',
+                  color: 'var(--color-text-primary)',
+                  margin: '2px 0 0',
+                }}
+              >
+                {planet.radiusKm.toLocaleString('pt-BR')} km
+              </p>
+            </div>
+
+            <div>
+              <p
+                style={{
+                  fontFamily: 'var(--font-data)',
+                  fontSize: 'var(--text-micro)',
+                  color: 'var(--color-text-muted)',
+                  margin: 0,
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.05em',
+                }}
+              >
+                Massa
+              </p>
+              <p
+                style={{
+                  fontFamily: 'var(--font-data)',
+                  fontSize: 'var(--text-micro)',
+                  color: 'var(--color-text-primary)',
+                  margin: '2px 0 0',
+                }}
+              >
+                {planet.massKg.toExponential(2)} kg
+              </p>
+            </div>
+
+            <div>
+              <p
+                style={{
+                  fontFamily: 'var(--font-data)',
+                  fontSize: 'var(--text-micro)',
+                  color: 'var(--color-text-muted)',
+                  margin: 0,
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.05em',
+                }}
+              >
+                Densidade
+              </p>
+              <p
+                style={{
+                  fontFamily: 'var(--font-data)',
+                  fontSize: 'var(--text-micro)',
+                  color: 'var(--color-text-primary)',
+                  margin: '2px 0 0',
+                }}
+              >
+                {planet.densityGcm3} g/cm³
+              </p>
+            </div>
+
+            <div>
+              <p
+                style={{
+                  fontFamily: 'var(--font-data)',
+                  fontSize: 'var(--text-micro)',
+                  color: 'var(--color-text-muted)',
+                  margin: 0,
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.05em',
+                }}
+              >
+                Inclinação Axial
+              </p>
+              <p
+                style={{
+                  fontFamily: 'var(--font-data)',
+                  fontSize: 'var(--text-micro)',
+                  color: 'var(--color-text-primary)',
+                  margin: '2px 0 0',
+                }}
+              >
+                {planet.axialTiltDeg}°
+              </p>
+            </div>
+
+            <div>
+              <p
+                style={{
+                  fontFamily: 'var(--font-data)',
+                  fontSize: 'var(--text-micro)',
+                  color: 'var(--color-text-muted)',
+                  margin: 0,
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.05em',
+                }}
+              >
+                Excentricidade
+              </p>
+              <p
+                style={{
+                  fontFamily: 'var(--font-data)',
+                  fontSize: 'var(--text-micro)',
+                  color: 'var(--color-text-primary)',
+                  margin: '2px 0 0',
+                }}
+              >
+                {planet.eccentricity}
+              </p>
+            </div>
+
+            <div>
+              <p
+                style={{
+                  fontFamily: 'var(--font-data)',
+                  fontSize: 'var(--text-micro)',
+                  color: 'var(--color-text-muted)',
+                  margin: 0,
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.05em',
+                }}
+              >
+                Inclinação Orbital
+              </p>
+              <p
+                style={{
+                  fontFamily: 'var(--font-data)',
+                  fontSize: 'var(--text-micro)',
+                  color: 'var(--color-text-primary)',
+                  margin: '2px 0 0',
+                }}
+              >
+                {planet.orbitalInclinationDeg}°
+              </p>
+            </div>
+
+            {planet.atmosphere && (
+              <div style={{ gridColumn: '1 / -1' }}>
+                <p
+                  style={{
+                    fontFamily: 'var(--font-data)',
+                    fontSize: 'var(--text-micro)',
+                    color: 'var(--color-text-muted)',
+                    margin: 0,
+                    textTransform: 'uppercase',
+                    letterSpacing: '0.05em',
+                  }}
+                >
+                  Atmosfera
+                </p>
+                <p
+                  style={{
+                    fontFamily: 'var(--font-data)',
+                    fontSize: 'var(--text-micro)',
+                    color: 'var(--color-text-primary)',
+                    margin: '2px 0 0',
+                    lineHeight: 1.4,
+                  }}
+                >
+                  {planet.atmosphere}
+                </p>
+              </div>
+            )}
+          </div>
+        )}
       </div>
 
       {/* Divider */}
