@@ -1,20 +1,19 @@
 import { OrbitControls, Stars } from '@react-three/drei';
-import { useRef, useState } from 'react';
+import { Planet } from './Planet';
+import { PLANETS, type PlanetData } from '../data/planets';
+import { useStore } from '../store/useStore';
+import { useCallback, useRef, useState } from 'react';
 import { useFrame, useThree } from '@react-three/fiber';
 import { Vector3 } from 'three';
 import type { OrbitControls as OrbitControlsImpl } from 'three-stdlib';
-import { Planet } from './Planet';
-import { PLANETS } from '../data/planets';
 
 const CAMERA_LERP = 0.12;
 const CAMERA_EASE = 0.08;
-const FOCUS_DISTANCE_MIN = 18;
-const FOCUS_DISTANCE_FACTOR = 3;
 
 export function Scene() {
   const controlsRef = useRef<OrbitControlsImpl | null>(null);
   const { camera } = useThree();
-  const [focusedId, setFocusedId] = useState<string | null>(null);
+  const { focusedPlanetId, setFocusedPlanetId } = useStore();
   const [target, setTarget] = useState<{
     lookAt: Vector3;
     distance: number;
@@ -44,17 +43,19 @@ export function Scene() {
     }
   });
 
-  const handleSelect = (
-    id: string,
-    pos: [number, number, number],
-    radius: number
-  ) => {
-    setFocusedId(id);
-    setTarget({
-      lookAt: new Vector3(...pos),
-      distance: Math.max(radius * FOCUS_DISTANCE_FACTOR, FOCUS_DISTANCE_MIN),
-    });
-  };
+  // Stable across re-renders: setFocusedPlanetId is a Zustand action (stable
+  // reference), and setTarget is a useState setter (also stable).
+  const handleSelect = useCallback(
+    (planet: PlanetData) => {
+      const [x, y, z] = planet.position;
+      setFocusedPlanetId(planet.id);
+      setTarget({
+        lookAt: new Vector3(x, y, z),
+        distance: Math.max(planet.radius * 3, 18),
+      });
+    },
+    [setFocusedPlanetId]
+  );
 
   return (
     <>
@@ -71,11 +72,9 @@ export function Scene() {
       {PLANETS.map((planet) => (
         <Planet
           key={planet.id}
-          {...planet}
-          isFocused={focusedId === planet.id}
-          onClick={() =>
-            handleSelect(planet.id, planet.position, planet.radius)
-          }
+          data={planet}
+          isFocused={focusedPlanetId === planet.id}
+          onSelect={() => handleSelect(planet)}
         />
       ))}
 

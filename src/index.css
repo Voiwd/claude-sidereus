@@ -1,7 +1,7 @@
 @import 'tailwindcss';
 
 :root {
-  /* Backgrounds — neutros quentes escuros */
+  /* Background — neutros quentes escuros */
   --color-bg: #0c0b09;
   --color-surface: #141210;
   --color-surface-2: #1c1a17;
@@ -18,12 +18,12 @@
   --color-accent-dim: #6b3510;
   --color-accent-glow: rgba(232, 118, 26, 0.18);
 
-  /* Estados semânticos */
+  /* Semântico */
   --color-success: #3dab7b;
   --color-warning: #d4882a;
   --color-error: #c04a3f;
 
-  /* Tipografia */
+  /* Tipografia — três famílias com papéis distintos */
   --font-display: 'Courier Prime', monospace;
   --font-serif: 'Source Serif 4', Georgia, serif;
   --font-data: 'IBM Plex Mono', monospace;
@@ -55,8 +55,9 @@
 html,
 body,
 #root {
+  height: 100%;
   margin: 0;
-  padding: 0;
   background-color: var(--color-bg);
   color: var(--color-text-primary);
+  font-family: var(--font-display);
 }

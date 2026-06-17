@@ -11,7 +11,7 @@ interface PlanetBillboardProps {
 
 const DRAG_THRESHOLD_PX = 6;
 const MIN_DIAMETER_PX = 20;
-const MAX_DIAMETER_PX = 35;
+const MAX_DIAMETER_PX = 40;
 
 export function PlanetBillboard({
   label,
@@ -56,16 +56,20 @@ export function PlanetBillboard({
           pointerStart.current = null;
         }}
         onPointerUp={handlePointerUp}
+        title={label}
+        type="button"
         style={{
           width: diameter,
           height: diameter,
-          border: '2px solid rgba(237, 233, 227, 0.7)',
+          border: '1.5px solid rgba(237, 233, 227, 0.7)',
           borderRadius: '999px',
           background: 'rgba(237, 233, 227, 0.08)',
-          boxShadow: '0 0 18px var(--color-accent-glow)',
+          boxShadow:
+            '0 0 12px rgba(232, 118, 26, 0.2), 0 0 4px rgba(237, 233, 227, 0.15)',
           cursor: 'pointer',
           padding: 0,
           outline: 'none',
+          transition: 'border-color 150ms, box-shadow 150ms',
         }}
         onFocus={(e) => {
           e.currentTarget.style.outline = '2px solid var(--color-accent)';
@@ -74,8 +78,15 @@ export function PlanetBillboard({
         onBlur={(e) => {
           e.currentTarget.style.outline = 'none';
         }}
-        title={label}
-        type="button"
+        onMouseEnter={(e) => {
+          e.currentTarget.style.borderColor = 'var(--color-accent)';
+          e.currentTarget.style.boxShadow = '0 0 18px var(--color-accent-glow)';
+        }}
+        onMouseLeave={(e) => {
+          e.currentTarget.style.borderColor = 'rgba(237, 233, 227, 0.7)';
+          e.currentTarget.style.boxShadow =
+            '0 0 12px rgba(232, 118, 26, 0.2), 0 0 4px rgba(237, 233, 227, 0.15)';
+        }}
       />
     </Html>
   );

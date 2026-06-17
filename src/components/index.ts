@@ -1,4 +1,5 @@
 export { Planet } from './Planet';
-export { Scene } from './Scene';
 export { PlanetBillboard } from './PlanetBillboard';
-export type { PlanetProps } from './types';
+export { PlanetPanel } from './PlanetPanel';
+export { Scene } from './Scene';
+export type { PlanetData } from '../data/planets';

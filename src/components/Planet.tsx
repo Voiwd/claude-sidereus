@@ -1,73 +1,76 @@
+import { memo } from 'react';
 import { useLoader } from '@react-three/fiber';
 import { DoubleSide, TextureLoader } from 'three';
 import { PlanetBillboard } from './PlanetBillboard';
-import type { PlanetConfig } from '../data/planets';
+import type { PlanetData } from '../data/planets';
 
 interface RingProps {
-  texture2: string;
-  innerRadius: number;
-  outerRadius: number;
+  ringTexture: string;
+  radius: number;
 }
 
-function Ring({ texture2, innerRadius, outerRadius }: RingProps) {
-  const texture = useLoader(TextureLoader, texture2);
+/** Loaded as a separate component so only Saturn pays the texture-load cost. */
+function Ring({ ringTexture, radius }: RingProps) {
+  const tex = useLoader(TextureLoader, ringTexture);
   return (
-    <mesh rotation={[Math.PI / 2, 0, 0]}>
-      <ringGeometry args={[innerRadius, outerRadius, 64]} />
-      <meshBasicMaterial map={texture} side={DoubleSide} transparent />
+    // ringGeometry is in the XY plane by default; rotate -90° to lay it flat.
+    <mesh rotation={[-Math.PI / 2, 0, 0]}>
+      <ringGeometry args={[radius * 1.25, radius * 2.5, 64]} />
+      <meshStandardMaterial map={tex} side={DoubleSide} transparent />
     </mesh>
   );
 }
 
-interface PlanetProps extends PlanetConfig {
+interface PlanetProps {
+  data: PlanetData;
   isFocused?: boolean;
-  onClick?: () => void;
+  onSelect?: () => void;
 }
 
-export function Planet({
-  position,
-  texture,
-  texture2,
-  radius,
-  name,
-  emissive,
-  emissiveIntensity,
-  isLight,
-  ring,
-  isFocused,
-  onClick,
-}: PlanetProps) {
-  const TEXTURE = useLoader(TextureLoader, texture);
+function PlanetComponent({ data, isFocused, onSelect }: PlanetProps) {
+  const {
+    position,
+    radius,
+    texture,
+    ringTexture,
+    emissive,
+    emissiveIntensity,
+    light,
+    name,
+  } = data;
+
+  const surface = useLoader(TextureLoader, texture);
 
   return (
     <group position={position}>
       <mesh>
         <sphereGeometry args={[radius, 64, 64]} />
         <meshStandardMaterial
-          map={TEXTURE}
-          emissive={emissive ?? 'black'}
-          emissiveIntensity={emissiveIntensity ?? 0}
+          map={surface}
+          emissive={emissive}
+          emissiveIntensity={emissiveIntensity}
         />
       </mesh>
 
-      {ring && texture2 && (
-        <Ring
-          texture2={texture2}
-          innerRadius={ring.innerRadius}
-          outerRadius={ring.outerRadius}
-        />
-      )}
+      {ringTexture && <Ring ringTexture={ringTexture} radius={radius} />}
 
-      {isLight && (
-        <pointLight color={0xf4a340} intensity={20000} distance={3000} />
+      {light && (
+        <pointLight
+          color={light.color}
+          intensity={light.intensity}
+          distance={light.distance}
+        />
       )}
 
       <PlanetBillboard
         hidden={isFocused}
         label={name}
         radius={radius}
-        onSelect={onClick}
+        onSelect={onSelect}
       />
     </group>
   );
 }
+
+/** Memoized: re-renders only when isFocused changes or onSelect identity changes. */
+export const Planet = memo(PlanetComponent);

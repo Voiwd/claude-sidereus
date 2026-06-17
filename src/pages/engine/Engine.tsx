@@ -1,6 +1,6 @@
 import { Canvas } from '@react-three/fiber';
 import { useNavigate } from 'react-router-dom';
-import { Scene } from '../../components';
+import { PlanetPanel, Scene } from '../../components';
 
 export function Engine() {
   const navigate = useNavigate();
@@ -8,42 +8,42 @@ export function Engine() {
   return (
     <div
       className="w-screen h-screen relative"
-      style={{ background: 'var(--color-bg)' }}
+      style={{ backgroundColor: 'var(--color-bg)' }}
     >
       <button
         onClick={() => navigate('/')}
         style={{
+          position: 'absolute',
+          top: 'var(--space-4)',
+          left: 'var(--space-4)',
+          zIndex: 10,
+          padding: 'var(--space-2) var(--space-4)',
+          backgroundColor: 'var(--color-surface)',
+          color: 'var(--color-text-primary)',
           fontFamily: 'var(--font-display)',
-          color: 'var(--color-text-secondary)',
-          background: 'var(--color-surface)',
-          border: '1px solid var(--color-border)',
-          borderRadius: 'var(--radius-md)',
           fontSize: 'var(--text-label)',
-          letterSpacing: '0.08em',
-          padding: '6px 12px',
+          fontWeight: 600,
+          borderRadius: 'var(--radius-md)',
+          border: '1px solid var(--color-border)',
           cursor: 'pointer',
-          transition: 'color 0.2s, border-color 0.2s',
+          transition: 'background-color 200ms, border-color 200ms',
+          letterSpacing: '0.05em',
         }}
         onMouseEnter={(e) => {
-          e.currentTarget.style.color = 'var(--color-text-primary)';
-          e.currentTarget.style.borderColor = 'var(--color-accent-dim)';
+          const btn = e.currentTarget as HTMLButtonElement;
+          btn.style.backgroundColor = 'var(--color-surface-2)';
+          btn.style.borderColor = 'var(--color-accent-dim)';
         }}
         onMouseLeave={(e) => {
-          e.currentTarget.style.color = 'var(--color-text-secondary)';
-          e.currentTarget.style.borderColor = 'var(--color-border)';
+          const btn = e.currentTarget as HTMLButtonElement;
+          btn.style.backgroundColor = 'var(--color-surface)';
+          btn.style.borderColor = 'var(--color-border)';
         }}
-        onFocus={(e) => {
-          e.currentTarget.style.outline = '2px solid var(--color-accent)';
-          e.currentTarget.style.outlineOffset = '2px';
-        }}
-        onBlur={(e) => {
-          e.currentTarget.style.outline = 'none';
-        }}
-        className="absolute top-4 left-4 z-10"
-        type="button"
       >
         ← VOLTAR
       </button>
+
+      <PlanetPanel />
 
       <Canvas camera={{ position: [0, 5, 12], fov: 60 }}>
         <Scene />
