@@ -1,8 +1,10 @@
-import { memo } from 'react';
-import { useLoader } from '@react-three/fiber';
+import { memo, useRef } from 'react';
+import { useLoader, useFrame } from '@react-three/fiber';
 import { DoubleSide, TextureLoader } from 'three';
 import { PlanetBillboard } from './PlanetBillboard';
-import type { PlanetData } from '../data/planets';
+import { radiusToScene } from '../engine/scale';
+import type { CelestialBody } from '../data/bodies';
+import type { Mesh } from 'three';
 
 interface RingProps {
   ringTexture: string;
@@ -22,37 +24,58 @@ function Ring({ ringTexture, radius }: RingProps) {
 }
 
 interface PlanetProps {
-  data: PlanetData;
+  data: CelestialBody;
+  position: [number, number, number];
   isFocused?: boolean;
   onSelect?: () => void;
 }
 
-function PlanetComponent({ data, isFocused, onSelect }: PlanetProps) {
-  const {
-    position,
-    radius,
-    texture,
-    ringTexture,
-    emissive,
-    emissiveIntensity,
-    light,
-    name,
-  } = data;
+function PlanetComponent({ data, position, isFocused, onSelect }: PlanetProps) {
+  const { radiusKm, render, name, rotationPeriodHours, axialTiltDeg } = data;
 
-  const surface = useLoader(TextureLoader, texture);
+  const radius = radiusToScene(radiusKm);
+  const texture = render.texture;
+  const ringTexture = render.ringTexture;
+  const emissive = render.emissive;
+  const emissiveIntensity = render.emissiveIntensity;
+  const light = render.light;
+
+  // Always call useLoader, but pass a fallback if texture is not available
+  const surface = useLoader(TextureLoader, texture || '');
+
+  const meshRef = useRef<Mesh>(null);
+
+  useFrame((_, delta) => {
+    if (!meshRef.current) return;
+
+    // Calculate rotation speed based on rotation period
+    const rotDir = rotationPeriodHours >= 0 ? 1 : -1;
+    const absHours = Math.abs(rotationPeriodHours) || 1;
+    // Rotate: rad/s = 2π / (hours * 3600)
+    // Multiply by 10 for visible speed at normal time scale
+    meshRef.current.rotation.y +=
+      rotDir * ((delta * 2 * Math.PI) / (absHours * 3600)) * 86400 * 10;
+  });
+
+  const tiltRad = (axialTiltDeg * Math.PI) / 180;
 
   return (
     <group position={position}>
-      <mesh>
-        <sphereGeometry args={[radius, 64, 64]} />
-        <meshStandardMaterial
-          map={surface}
-          emissive={emissive}
-          emissiveIntensity={emissiveIntensity}
-        />
-      </mesh>
+      {/* Tilted group for axial rotation */}
+      <group rotation={[0, 0, tiltRad]}>
+        {texture && surface && (
+          <mesh ref={meshRef}>
+            <sphereGeometry args={[radius, 64, 64]} />
+            <meshStandardMaterial
+              map={surface}
+              emissive={emissive}
+              emissiveIntensity={emissiveIntensity}
+            />
+          </mesh>
+        )}
 
-      {ringTexture && <Ring ringTexture={ringTexture} radius={radius} />}
+        {ringTexture && <Ring ringTexture={ringTexture} radius={radius} />}
+      </group>
 
       {light && (
         <pointLight

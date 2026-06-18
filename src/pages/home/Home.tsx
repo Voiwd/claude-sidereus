@@ -1,7 +1,7 @@
 import { useNavigate } from 'react-router-dom';
 import { useEffect, useRef, useState } from 'react';
 import * as THREE from 'three';
-import { PLANETS, getPlanetById } from '../../data/planets';
+import { BODIES, getBodyById } from '../../data/bodies';
 
 const HEADLINE = 'Sidereus';
 const SUBTITLE =
@@ -14,14 +14,14 @@ const PARALLAX = 1;
 
 // Single source of truth: the curiosities carousel reuses the same celestial-body
 // data the /engine scene renders from, so descriptions stay in sync across the app.
-const ASTROS = PLANETS.map((p) => ({
+const ASTROS = BODIES.filter((b) => b.kind !== 'moon').map((p) => ({
   name: p.name,
   kind: p.type,
   text: p.description,
 }));
 
 // The hero globe loads the very same Earth texture the engine uses for its Terra.
-const EARTH_TEXTURE = getPlanetById('terra')!.texture;
+const EARTH_TEXTURE = getBodyById('terra')!.render.texture!;
 
 /** WebGL Earth globe (engine's Terra texture) with a parallaxing star field, painted only while the hero is visible. */
 function HeroGlobe() {
