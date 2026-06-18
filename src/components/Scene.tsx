@@ -61,7 +61,7 @@ export function Scene() {
         moon,
         phaseOffset: (mi / arr.length) * TWO_PI,
         orbitRadius: moonOrbitToScene(moon.semiMajorAxisKm ?? 10000),
-        period: Math.abs(moon.orbitalPeriodDays || 1),
+        period: moon.orbitalPeriodDays || 1,
       })),
     }));
   }, []);

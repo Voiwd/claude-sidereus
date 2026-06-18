@@ -46,7 +46,7 @@ export function Engine() {
       <PlanetPanel />
       <TimeControls />
 
-      <Canvas camera={{ position: [0, 100, 300], fov: 60 }}>
+      <Canvas camera={{ position: [0, 100, 300], fov: 60, far: 15000 }}>
         <Scene />
       </Canvas>
     </div>
