@@ -1,6 +1,7 @@
 import { memo, useRef } from 'react';
 import { useFrame } from '@react-three/fiber';
-import { radiusToScene } from '../engine/scale';
+import { bodyRadiusToScene } from '../engine/scale';
+import { useStore } from '../store/useStore';
 import type { CelestialBody } from '../data/bodies';
 import type { Mesh } from 'three';
 
@@ -12,18 +13,17 @@ interface MoonProps {
 function MoonComponent({ data, position }: MoonProps) {
   const { radiusKm, rotationPeriodHours } = data;
 
-  const radius = radiusToScene(radiusKm);
+  const radius = bodyRadiusToScene(radiusKm);
   const meshRef = useRef<Mesh>(null);
 
-  useFrame((_, delta) => {
-    if (!meshRef.current) return;
+  const absHours = Math.abs(rotationPeriodHours) || 1;
 
-    // Gentle rotation: always positive and fast for visual effect
-    const absHours = Math.abs(rotationPeriodHours) || 1;
-    // Rotate: rad/s = 2π / (hours * 3600)
-    // Multiply by 10 for visible speed at normal time scale
-    meshRef.current.rotation.y +=
-      ((delta * 2 * Math.PI) / (absHours * 3600)) * 86400 * 10;
+  useFrame(() => {
+    if (!meshRef.current) return;
+    // Absolute angle from sim time, so spin pauses/resets with the simulation.
+    const simTimeDays = useStore.getState().simTimeDays;
+    const rotations = (simTimeDays * 24) / absHours;
+    meshRef.current.rotation.y = rotations * 2 * Math.PI;
   });
 
   return (

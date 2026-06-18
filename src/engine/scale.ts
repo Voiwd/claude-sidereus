@@ -1,38 +1,55 @@
-// Render scale system: maps real-world solar system measurements to scene units.
-// Distances and radii use separate scales to keep all bodies visible.
+// Engine scale: maps physical solar-system measurements to Three.js scene units (u).
+// All SCREAMING_SNAKE_CASE constants below are the only values to change when
+// adjusting visual feel. Never hard-code these in component files.
+// See docs/engine-scale.md for the design rationale behind each system.
 
-// Orbital distance scale: 1 AU = 10 scene units.
-// Neptune (~30 AU) maps to ~300 scene units.
-export const AU_UNIT = 10;
+// ── System 1: Body radii ─────────────────────────────────────────────────────
+// Linear: radius_u = radiusKm × BODY_SCALE_KM_TO_U
+// Single factor for ALL bodies (Sol, planets, moons) — real size ratios preserved.
+// Sol ≈ 55.7u  Jupiter ≈ 5.59u  Earth ≈ 0.51u  Moon ≈ 0.14u (27% of Earth ✓)
+export const BODY_SCALE_KM_TO_U = 8e-5;
+// Floor so bodies smaller than Phobos don't vanish below a pixel.
+export const MIN_BODY_RADIUS_U = 0.06;
 
-// Body radius scale: power-law to compress 6 orders of magnitude.
-// radiusToScene(km) = BODY_K * km^BODY_EXP, clamped to MIN_BODY_RADIUS.
-// This preserves relative ordering while making tiny bodies visible.
-// Example outputs: Sun ~14.8, Jupiter ~5.6, Earth ~1.8, Moon ~0.97, Phobos ~0.15(min)
-const BODY_K = 0.035;
-const BODY_EXP = 0.45;
-export const MIN_BODY_RADIUS = 0.15;
+// ── System 2: Heliocentric orbital distances ──────────────────────────────────
+// Linear: distance_u = semiMajorAxisAU × AU_TO_U
+// 200 chosen so Mercury's orbit (77.4u) clears Sol's surface (55.7u) by 21.7u.
+export const AU_TO_U = 200;
 
-// Moon orbital scale: power-law on km, clamped to MIN_MOON_ORBIT.
-// Scales independently of planet distance to keep moons visible.
-// Example outputs: Moon ~8.0, Titan ~15.7, Callisto ~18.8, Phobos ~2.5(min)
-const MOON_K = 0.007;
-const MOON_EXP = 0.55;
-export const MIN_MOON_ORBIT = 2.5;
+// ── System 3: Moon orbital distances ─────────────────────────────────────────
+// Same factor as body radii so the Moon-to-Earth distance ratio is real (~60× Rearth).
+// Earth's Moon: 384 400 km × 8e-5 = 30.75u.  Phobos: 9 376 km × 8e-5 = 0.75u.
+export const MOON_ORBIT_KM_TO_U = BODY_SCALE_KM_TO_U;
+// Floor prevents tight-orbit moons (Phobos real ≈ 0.75u) from clipping inside Mars.
+export const MIN_MOON_ORBIT_U = 1.5;
+
+// ── Camera ────────────────────────────────────────────────────────────────────
+// Focus distance = bodyRadius × CAMERA_FOCUS_MULTIPLIER, so the camera sits
+// proportionally outside the focused body regardless of its scale.
+export const CAMERA_FOCUS_MULTIPLIER = 3.5;
+export const MIN_FOCUS_DISTANCE_U = 4;
+
+// ── Starfield ─────────────────────────────────────────────────────────────────
+// Stars sphere must enclose the entire solar system (Neptune orbit ≈ 6014u).
+export const STARFIELD_RADIUS_U = 8000;
+
+// ─────────────────────────────────────────────────────────────────────────────
 
 export function auToScene(au: number): number {
-  return au * AU_UNIT;
+  return au * AU_TO_U;
 }
 
-export function radiusToScene(km: number): number {
-  return Math.max(BODY_K * Math.pow(km, BODY_EXP), MIN_BODY_RADIUS);
+export function bodyRadiusToScene(km: number): number {
+  return Math.max(km * BODY_SCALE_KM_TO_U, MIN_BODY_RADIUS_U);
 }
 
 export function moonOrbitToScene(km: number): number {
-  return Math.max(MOON_K * Math.pow(km, MOON_EXP), MIN_MOON_ORBIT);
+  return Math.max(km * MOON_ORBIT_KM_TO_U, MIN_MOON_ORBIT_U);
 }
 
-// Camera focus distance for a body given its km radius.
-export function focusDistanceForRadius(km: number): number {
-  return Math.max(radiusToScene(km) * 3.5, 4);
+export function focusDistanceForBody(km: number): number {
+  return Math.max(
+    bodyRadiusToScene(km) * CAMERA_FOCUS_MULTIPLIER,
+    MIN_FOCUS_DISTANCE_U
+  );
 }

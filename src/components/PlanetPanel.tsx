@@ -81,7 +81,7 @@ export function PlanetPanel() {
                 letterSpacing: '0.08em',
               }}
             >
-              Solução do Sistema Solar
+              Coração do Sistema Solar
             </p>
           )}
         </div>
