@@ -74,7 +74,8 @@ export function TimeControls() {
           }}
           onMouseEnter={(e) => {
             if (!paused) {
-              e.currentTarget.style.backgroundColor = '#d96a0f';
+              e.currentTarget.style.backgroundColor =
+                'var(--color-accent-warm)';
             }
           }}
           onMouseLeave={(e) => {

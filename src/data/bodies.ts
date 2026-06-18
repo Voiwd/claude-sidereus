@@ -72,7 +72,7 @@ export const BODIES: CelestialBody[] = [
       texture: texture('sol/2k_sun.jpg'),
       emissive: 'orange',
       emissiveIntensity: 0.5,
-      light: { color: 'white', intensity: 20000, distance: 3000 },
+      light: { color: 'white', intensity: 2.0, distance: 7000 },
     },
   },
   {
